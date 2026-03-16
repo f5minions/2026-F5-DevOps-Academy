@@ -1,0 +1,28 @@
+bigip_login_secret: bigip-login
+rbac:
+  create: true
+serviceAccount:
+  create: true
+  name: k8s-bigip-ctlr-ingressonly
+namespace: bigip
+ingressClass:
+  create: false
+  ingressClassName: f5
+  isDefaultIngressController: false
+args:
+  bigip_url: 10.1.20.5
+  bigip_partition: k8s-1
+  verify_interval: 30
+  node-poll_interval: 30
+  log_level: DEBUG
+  pool_member_type: nodeport
+  insecure: true
+  agent: as3
+  custom-resource-mode: true
+  log-as3-response: true
+image:
+  user: f5networks
+  repo: k8s-bigip-ctlr
+  pullPolicy: Always
+version: 2.20.1
+affinity:
