@@ -376,6 +376,7 @@ server {
 
 
 NGINX 리스너 IP와 포트로 RED App1에 접속: 10.1.1.11:9001
+
 ![UDF-Firefox](images/firefox-app-1-red.png)
 
 
@@ -522,7 +523,7 @@ http://10.1.1.11:8080
   	kubectl get services
 
 
-## API 직접 테스트 ##
+#### API 직접 테스트 ####
 	curl http://10.1.20.22:30080/get
 
 ### 간단한 API 게이트웨이 기능을 위한 NGINX 설정 ###
@@ -582,6 +583,6 @@ location 블록에서 limit_req를 사용하여 상단에 정의된 limit_req_zo
 ### 위반 발생 속도 제한 테스트 ###
 	for i in {1..10}; do   curl -i -s -o /dev/null -w "%{http_code}\n" http://10.1.1.11:8000/get;  done
 
-즉시 10번의 요청을 보내면 최초 요청과 burst=1로 인해 큐에 저장된 요청까지 총 2번은 200 OK가 반환되고 나머지는 속도 제한을 초과하여 503 Service Unavailable이 반환됩니다.
+즉시 10번의 요청을 보내면 최초 요청과 burst=1로 인해 큐에 저장된 요청까지 총 2번은 200 OK가 반환되고, 나머지는 속도 제한을 초과하여 503 Service Unavailable이 반환됩니다.
 
 ## LAB 세션 1 종료 ##
