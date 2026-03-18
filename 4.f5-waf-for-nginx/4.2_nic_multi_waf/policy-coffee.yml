@@ -1,0 +1,16 @@
+apiVersion: k8s.nginx.org/v1
+kind: Policy
+metadata:
+  name: coffee-policy
+  namespace: nap
+spec:
+  waf:
+    enable: true
+    apPolicy: "nap-coffee"
+    securityLogs:
+    - enable: true
+      apLogConf: "logconf"
+      logDest: "syslog:server=fluentd-svc.fluentd:8515"
+    - enable: true
+      apLogConf: "logconf"
+      logDest: "syslog:server=127.0.0.1:1514"
