@@ -11,6 +11,3 @@ spec:
     - enable: true
       apLogConf: "logconf"
       logDest: "syslog:server=fluentd-svc.fluentd:8515"
-    - enable: true
-      apLogConf: "logconf"
-      logDest: "syslog:server=127.0.0.1:1514"
