@@ -1,112 +1,41 @@
-# JWT Token authentication
+# Ingress Controller Lab #3 - Authentication  
 
-This use case shows how to enforce JWT authentication at the NGINX Ingress Controller level
+## Lab 개요 
+* NGINX Ingress Controller 수준에서 JWT 인증을 적용하는 방법을 실습 
 
-Get NGINX Ingress Controller Node IP, HTTP and HTTPS NodePorts
-```code
-export NIC_IP=`kubectl get pod -l app.kubernetes.io/instance=nic -n nginx-ingress -o json|jq '.items[0].status.hostIP' -r`
-export HTTP_PORT=`kubectl get svc nic-nginx-ingress-controller -n nginx-ingress -o jsonpath='{.spec.ports[0].nodePort}'`
-export HTTPS_PORT=`kubectl get svc nic-nginx-ingress-controller -n nginx-ingress -o jsonpath='{.spec.ports[1].nodePort}'`
-```
+* 랩의 결과 
+    - JWT Token 이 없는 접속은 401 Authorization Required Return
+    - 올바른 JWT Token 이 있는 접속은 정상 접속 
+    - 비정상 JWT Token 의 경우 401 Authorization Required Return
 
-Check NGINX Ingress Controller IP address, HTTP and HTTPS ports
-```code
-echo -e "NIC address: $NIC_IP\nHTTP port  : $HTTP_PORT\nHTTPS port : $HTTPS_PORT"
-```
+<br>
 
-`cd` into the lab directory
-```code
-cd ~/NGINX-Ingress-Controller-Lab/labs/3.authentication
-```
+---
 
-Deploy the sample web applications
+### 샘플 서비스 배포
 ```code
 kubectl apply -f 0.webapp.yaml
 ```
 
-Deploy the JWK secret
+### JWK Secret 배포
 ```code
 kubectl apply -f 1.jwk-secret.yaml
 ```
 
-Deploy the JWT policy
+### JWT Policy 배포 
 ```code
 kubectl apply -f 2.jwt-policy.yaml
 ```
 
-Publish the application through NGINX Ingress Controller applying the JWT policy
+### NGINX Virtual Server 배포 
 ```code
 kubectl apply -f 3.virtual-server.yaml
 ```
 
-Check the newly created `VirtualServer` resource
+### 테스트 접속 수행
+* 초도 접속 수행 -> 401 CODE 
 ```code
-kubectl get vs -o wide
-```
-
-Output should be similar to
-```code
-NAME     STATE   HOST                 IP    EXTERNALHOSTNAME   PORTS   AGE
-webapp   Valid   webapp.example.com                                    33s
-```
-
-Describe the `webapp` virtualserver
-```code
-kubectl describe vs webapp
-```
-
-Output should be similar to
-```code
-Name:         webapp
-Namespace:    default
-Labels:       <none>
-Annotations:  <none>
-API Version:  k8s.nginx.org/v1
-Kind:         VirtualServer
-Metadata:
-  Creation Timestamp:  2025-04-03T18:01:01Z
-  Generation:          1
-  Resource Version:    227335
-  UID:                 af70fa4f-2dbc-4412-a311-88b861deb52d
-Spec:
-  Host:  webapp.example.com
-  Policies:
-    Name:  jwt-policy
-  Routes:
-    Action:
-      Pass:  webapp
-    Path:    /
-  Upstreams:
-    Name:     webapp
-    Port:     80
-    Service:  webapp-svc
-Status:
-  Message:  Configuration for default/webapp was added or updated 
-  Reason:   AddedOrUpdated
-  State:    Valid
-Events:
-  Type    Reason          Age   From                      Message
-  ----    ------          ----  ----                      -------
-  Normal  AddedOrUpdated  11s   nginx-ingress-controller  Configuration for default/webapp was added or updated
-```
-
-# Test application access
-
-Access the application without a JWT token
-
-```code
-curl -i -H "Host: webapp.example.com" http://$NIC_IP:$HTTP_PORT
-```
-
-The reply should be similar to
-```
-HTTP/1.1 401 Unauthorized
-Server: nginx/1.27.2
-Date: Thu, 03 Apr 2025 18:02:15 GMT
-Content-Type: text/html
-Content-Length: 179
-Connection: keep-alive
-WWW-Authenticate: Bearer realm="MyProductAPI"
+curl http://webapp.vs.example.com
 
 <html>
 <head><title>401 Authorization Required</title></head>
@@ -116,33 +45,25 @@ WWW-Authenticate: Bearer realm="MyProductAPI"
 </body>
 </html>
 ```
-
-Access the application using a valid JWT token
-
+* 2차 접속 수행 (with JWT Token) 
 ```code
-curl -i -H "Host: webapp.example.com" http://$NIC_IP:$HTTP_PORT -H "token: `cat token.jwt`"
-```
+curl http://webapp.vs.example.com -H "token: `cat token.jwt`"
 
-The reply should be similar to
-```code
-HTTP/1.1 200 OK
-Server: nginx/1.27.2
-Date: Thu, 03 Apr 2025 18:03:47 GMT
-Content-Type: text/plain
-Content-Length: 158
-Connection: keep-alive
-Expires: Thu, 03 Apr 2025 18:03:46 GMT
-Cache-Control: no-cache
-
-Server address: 192.168.36.101:8080
-Server name: webapp-6db59b8dcc-ltt6p
-Date: 03/Apr/2025:18:03:47 +0000
+Server address: 10.221.0.59:8080
+Server name: webapp-8598df94db-dmhrt
+Date: 19/Mar/2026:08:59:23 +0000
 URI: /
-Request ID: 647bb23b4b46630207ec55267584d403
+Request ID: 34e2d9643613ed57f5149605cf3a7c2b
 ```
-
-Delete the lab
-
+* 3차 접속 수행 (with Abnormal JWT Token) 
 ```code
-kubectl delete -f .
+curl http://webapp.vs.example.com -H "token: `cat wrong.jwt`"
+
+<html>
+<head><title>401 Authorization Required</title></head>
+<body>
+<center><h1>401 Authorization Required</h1></center>
+<hr><center>nginx/1.27.2</center>
+</body>
+</html>
 ```

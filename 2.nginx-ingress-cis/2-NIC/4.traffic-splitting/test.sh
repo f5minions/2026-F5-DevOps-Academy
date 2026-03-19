@@ -5,7 +5,7 @@ coffee_v2_count=0
 
 for i in {1..100}
 do
-  response=$(curl -sH "Host: cafe.example.com" http://$NIC_IP:$HTTP_PORT/coffee | grep "Server name" | awk '{print $3}')
+  response=$(curl http://cafe.vs.example.com/coffee | grep "Server name" | awk '{print $3}')
 
   if [[ "$response" == *"v1"* ]]; then
     coffee_v1_count=$((coffee_v1_count + 1))
