@@ -1,15 +1,12 @@
 apiVersion: "cis.f5.com/v1"
 kind: IngressLink
 metadata:
-  name: ingresslink
+  name: nginx-ingress
   namespace: nginx
 spec:
-  virtualServerAddress: "10.1.10.10"
-#  partition: partition36
-#  host: vs.example.com
+  virtualServerAddress: "10.1.10.100"
   iRules:
     - /Common/Proxy_Protocol_iRule
-      #  bigipRouteDomain: 36
   selector:
     matchLabels:
-      app: f5-cis-1
+      ingresslink: "true"
