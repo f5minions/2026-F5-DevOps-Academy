@@ -113,7 +113,7 @@ NGINX Plus는 기본 NGINX 오픈소스(OSS) 빌드 위에 엔터프라이즈 �
 
 ```bash
 	##출력 예시##
-    nginx version: nginx/1.27.4 (nginx-plus-r34-p1)
+    nginx version: nginx/1.29.3 (nginx-plus-r36-p2)
     Usage: nginx [-?hvVtTq] [-s signal] [-p prefix]
              [-e filename] [-c filename] [-g directives]
 
@@ -140,7 +140,7 @@ NGINX Plus는 기본 NGINX 오픈소스(OSS) 빌드 위에 엔터프라이즈 �
 
 ```bash
     ##출력 예시##
-    nginx version: nginx/1.27.4 (nginx-plus-r34-p1)  # "-plus-rXX" 라벨에 주목
+    nginx version: nginx/1.29.3 (nginx-plus-r36-p2)  # "-plus-rXX" 라벨에 주목
 
 ```
 
@@ -153,11 +153,11 @@ NGINX Plus는 기본 NGINX 오픈소스(OSS) 빌드 위에 엔터프라이즈 �
 
 ```bash
     ##출력 예시##
-    nginx version: nginx/1.27.4 (nginx-plus-r34-p1)
-    built by gcc 12.2.0 (Debian 12.2.0-14+deb12u1) 
-    built with OpenSSL 3.0.16 11 Feb 2025           # OpenSSL 버전에 주목
+    nginx version: nginx/1.29.3 (nginx-plus-r36-p2)
+    built by gcc 11.4.0 (Ubuntu 11.4.0-1ubuntu1~22.04.2) 
+    built with OpenSSL 3.0.2 15 Mar 2022
     TLS SNI support enabled
-    configure arguments: --prefix=/etc/nginx --sbin-path=/usr/sbin/nginx --modules-path=/usr/lib/nginx/modules --conf-path=/etc/nginx/nginx.conf --error-log-path=/var/log/nginx/error.log --http-log-path=/var/log/nginx/access.log --pid-path=/var/run/nginx.pid --lock-path=/var/run/nginx.lock --http-client-body-temp-path=/var/cache/nginx/client_temp --http-proxy-temp-path=/var/cache/nginx/proxy_temp --http-fastcgi-temp-path=/var/cache/nginx/fastcgi_temp --http-uwsgi-temp-path=/var/cache/nginx/uwsgi_temp --http-scgi-temp-path=/var/cache/nginx/scgi_temp --user=nginx --group=nginx --with-compat --with-file-aio --with-threads --with-http_addition_module --with-http_auth_request_module --with-http_dav_module --with-http_flv_module --with-http_gunzip_module --with-http_gzip_static_module --with-http_mp4_module --with-http_random_index_module --with-http_realip_module --with-http_secure_link_module --with-http_slice_module --with-http_ssl_module --with-http_stub_status_module --with-http_sub_module --with-http_v2_module --with-http_v3_module --with-mail --with-mail_ssl_module --with-stream --with-stream_realip_module --with-stream_ssl_module --with-stream_ssl_preread_module --build=nginx-plus-r34-p1 --state-path=/var/lib/nginx/state --with-http_auth_jwt_module --with-http_f4f_module --with-http_hls_module --with-http_oidc_module --with-http_proxy_protocol_vendor_module --with-http_session_log_module --with-mgmt --with-stream_mqtt_filter_module --with-stream_mqtt_preread_module --with-stream_proxy_protocol_vendor_module --system-ca-bundle=/etc/ssl/certs/ca-certificates.crt --with-cc-opt='-g -O2 -ffile-prefix-map=/home/builder/debuild/nginx-plus-1.27.4/debian/debuild-base/nginx-plus-1.27.4=. -fstack-protector-strong -Wformat -Werror=format-security -Wp,-D_FORTIFY_SOURCE=2 -fPIC' --with-ld-opt='-Wl,-z,relro -Wl,-z,now -Wl,--as-needed -pie'
+    configure arguments: --prefix=/etc/nginx --sbin-path=/usr/sbin/nginx --modules-path=/usr/lib/nginx/modules --conf-path=/etc/nginx/nginx.conf --error-log-path=/var/log/nginx/error.log --http-log-path=/var/log/nginx/access.log --pid-path=/run/nginx.pid --lock-path=/run/nginx.lock --http-client-body-temp-path=/var/cache/nginx/client_temp --http-proxy-temp-path=/var/cache/nginx/proxy_temp --http-fastcgi-temp-path=/var/cache/nginx/fastcgi_temp --http-uwsgi-temp-path=/var/cache/nginx/uwsgi_temp --http-scgi-temp-path=/var/cache/nginx/scgi_temp --user=nginx --group=nginx --with-compat --with-file-aio --with-threads --with-http_addition_module --with-http_auth_request_module --with-http_dav_module --with-http_flv_module --with-http_gunzip_module --with-http_gzip_static_module --with-http_mp4_module --with-http_random_index_module --with-http_realip_module --with-http_secure_link_module --with-http_slice_module --with-http_ssl_module --with-http_stub_status_module --with-http_sub_module --with-http_v2_module --with-http_v3_module --with-mail --with-mail_ssl_module --with-stream --with-stream_realip_module --with-stream_ssl_module --with-stream_ssl_preread_module --build=nginx-plus-r36-p2 --state-path=/var/lib/nginx/state --with-http_auth_jwt_module --with-http_f4f_module --with-http_hls_module --with-http_oidc_module --with-http_proxy_protocol_vendor_module --with-http_session_log_module --with-mgmt --with-stream_mqtt_filter_module --with-stream_mqtt_preread_module --with-stream_proxy_protocol_vendor_module --system-ca-bundle=/etc/ssl/certs/ca-certificates.crt --with-cc-opt='-g -O2 -ffile-prefix-map=/home/builder/debuild/nginx-plus-1.29.3/debian/debuild-base/nginx-plus-1.29.3=. -flto=auto -ffat-lto-objects -flto=auto -ffat-lto-objects -fstack-protector-strong -Wformat -Werror=format-security -Wp,-D_FORTIFY_SOURCE=2 -fPIC' --with-ld-opt='-Wl,-Bsymbolic-functions -flto=auto -ffat-lto-objects -flto=auto -Wl,-z,relro -Wl,-z,now -Wl,--as-needed -pie'
 
 	## 보기 좋은 출력 예시
 	--prefix=/etc/nginx
@@ -180,23 +180,23 @@ NGINX Plus는 기본 NGINX 오픈소스(OSS) 빌드 위에 엔터프라이즈 �
     Status: install ok installed
     Priority: optional
     Section: httpd
-    Installed-Size: 5173
+    Installed-Size: 5530
     Maintainer: NGINX Packaging <nginx-packaging@f5.com>
-    Architecture: arm64
-    Version: 34-2~bookworm
+    Architecture: amd64
+    Version: 36-3~jammy
     Replaces: nginx, nginx-core, nginx-plus-debug
-    Provides: httpd, nginx, nginx-plus-r34
-    Depends: libc6 (>= 2.34), libcrypt1 (>= 1:4.1.0), libpcre2-8-0 (>= 10.22), libssl3 (>= 3.0.0), zlib1g (>= 1:1.1.4), lsb-base (>= 3.0-6), ca-certificates
+    Provides: httpd, nginx, nginx-plus-r36
+    Depends: libc6 (>= 2.34), libcrypt1 (>= 1:4.1.0), libpcre2-8-0 (>= 10.22), libssl3 (>= 3.0.0~~alpha1), zlib1g (>= 1:1.1.4), lsb-base (>= 3.0-6), ca-certificates
     Recommends: logrotate
     Conflicts: nginx, nginx-common, nginx-core
     Conffiles:
-    /etc/init.d/nginx 0b8cb35c30e187ff9bdfd5d9e7d79631
-    /etc/init.d/nginx-debug ed610161bfa49f021f5afa483a10eac5
-    /etc/logrotate.d/nginx a4da44b03e39926b999329061770362b
+    /etc/init.d/nginx 6ecbccd012c1aca2283e51c0f955adfa
+    /etc/init.d/nginx-debug 162dc0451b738ac7f589542aca6bfb9a
+    /etc/logrotate.d/nginx a6fa110b571d1afc5ec6ee739ac33f5b
     /etc/nginx/conf.d/default.conf 5e054c6c3b2901f98e0d720276c3b20c
     /etc/nginx/fastcgi_params 4729c30112ca3071f4650479707993ad
     /etc/nginx/mime.types 754582375e90b09edaa6d3dbd657b3cf
-    /etc/nginx/nginx.conf e7b0272ab0408de48c8440432787ba7b
+    /etc/nginx/nginx.conf fcbf6f56dd545b8240856d108aac868e
     /etc/nginx/scgi_params df8c71e25e0356ffc539742f08fddfff
     /etc/nginx/uwsgi_params 88ac833ee8ea60904a8b3063fde791de
     Description: NGINX Plus, provided by Nginx, Inc.
@@ -311,13 +311,11 @@ Index.html 파일은 레포지토리 작업 디렉토리에서 확인할 수 있
 	ls
 	cat index.html
 
- 	cd /opt/services/
-	cd app2/
+ 	cd /opt/services/app2/
 	ls
 	cat index.html
 
-	cd /opt/services/
-	cd app3/
+	cd /opt/services/app3/
 	ls
 	cat index.html
 
