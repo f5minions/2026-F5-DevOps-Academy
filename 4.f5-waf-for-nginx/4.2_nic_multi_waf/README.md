@@ -33,6 +33,8 @@
 
 ### Step 1 · 작업 디렉토리 이동
 
+> **실행 환경:** Client-vscode 터미널
+
 ```bash
 cd ~/2026-F5-DevOps-Academy/4.f5-waf-for-nginx/4.2_nic_multi_waf
 ```

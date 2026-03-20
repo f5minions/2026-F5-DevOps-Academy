@@ -61,6 +61,8 @@
 
 ### 사전 준비: K8S 프로파일 설정
 
+> **실행 환경:** Client-vscode 터미널
+
 ```bash
 # K8S 컨텍스트를 rancher1로 전환
 kubectl config use-context rancher1
@@ -489,7 +491,7 @@ spec:
 EOF
 ```
 
-**차단 확인:**
+**차단 확인 (5~10초 대기 후):** 
 
 ```bash
 curl -X LINK "http://nap.f5k8s.net"
