@@ -89,8 +89,8 @@ F5 IngressLink는 BIG-IP 컨테이너 인그레스 서비스와 Kubernetes용 NG
 <br>
 
 ### 1. CIS Deploy 
-[F5 CIS Deploy](/1-CIS/README.md)을 참고하세요.
+[F5 CIS Deploy](./1-CIS/README.md)을 참고하세요.
 
 
 ### 2. NGINX Ingress Controller & SVC Deploy 
-[NGINX Ingress Controller](/2-NIC/README.md)을 참고하세요.
+[NGINX Ingress Controller](./2-NIC/README.md)을 참고하세요.
