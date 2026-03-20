@@ -1,68 +1,108 @@
-# Enable Multiple WAF on different URL Paths
+# F5 WAF for NGINX — LAB 4.2: 멀티 WAF (경로별 정책 분리)
 
-In this example we define different WAF Policies for different URL Path of the application that we have published through NGINX+ IC VirtualServer resources. The configuration would be as follows:
+> **실습 환경:** Client-vscode 터미널  
+> **목표:** VirtualServer의 URL 경로별로 서로 다른 WAF 정책을 적용하여, 애플리케이션 단위의 독립적인 보안 제어를 구현한다.
 
-- For path **/tea** we will use policy **nap-tea**
-- For path **/coffee** we will use policy **nap-coffee**
-- For everything else we will use policy **nap-cocoa**
+---
 
-## Prerequisites
+## 목차
 
-> *To run the demos, use the terminal on VS Code. VS Code is under the `bigip-01` on the `Access` drop-down menu. Click `<a href="https://raw.githubusercontent.com/F5EMEA/oltra/main/vscode.png">` here `</a>` to see how.*
+1. [실습 개요](#1-실습-개요)
+2. [환경 구성](#2-환경-구성)
+3. [WAF 정책 배포](#3-waf-정책-배포)
+4. [VirtualServer 구성 및 배포](#4-virtualserver-구성-및-배포)
+5. [동작 확인](#5-동작-확인)
 
-Change the working directory to `path-based`.
+---
 
+## 1. 실습 개요
+
+하나의 VirtualServer에서 URL 경로에 따라 서로 다른 WAF 정책을 적용합니다.
+
+| 경로                        | 서비스     | WAF 정책       |
+| --------------------------- | ---------- | -------------- |
+| `/tea`                      | tea-svc    | **nap-tea**    |
+| `/coffee`                   | coffee-svc | **nap-coffee** |
+| 그 외 모든 경로 (Catch-all) | cocoa-svc  | **nap-cocoa**  |
+
+각 정책은 차단 시 **정책 이름이 포함된 고유한 메시지**를 반환하므로, 어느 정책이 적용되었는지 응답만으로 바로 구분할 수 있습니다.
+
+---
+
+## 2. 환경 구성
+
+### Step 1 · 작업 디렉토리 이동
+
+```bash
+cd ~/2026-F5-DevOps-Academy/4.f5-waf-for-nginx/4.2_nic_multi_waf
 ```
-cd ~/2026-F5-DevOps-Academy/4.f5-waf-for-nginx/4.2_nic_multi_waf 
-```
 
-## Step 1. Deploy a Web Application
+### Step 2 · 애플리케이션 배포 (`apps.yml`)
 
-Create the application deployment and service:
+3개의 Deployment와 3개의 Service를 한 번에 생성합니다.
 
-```
-kubectl create namespace nap
+```bash
 kubectl apply -f apps.yml
+
+# 배포 상태 확인
+kubectl get pod -n nap && kubectl get service -n nap
 ```
 
-## Step 2 - Create 3 different NAP Policies
+---
 
-We will create 3 NAP policies. To easily differentiate the three policies, each policy will have a different blocking message that will mention the policy name.
-The blocking message will be similar to **Blocked from NAP policy: <Policy_name>.**
+## 3. WAF 정책 배포
 
-```
+### Step 3 · APPolicy 생성 (경로별 3개)
+
+각 경로에 독립적인 보안 정책을 적용하기 위해 APPolicy를 3개 생성합니다.  
+정책마다 고유한 차단 메시지가 설정되어 있어, 응답으로 어느 정책이 동작했는지 바로 확인할 수 있습니다.
+
+```bash
 kubectl apply -f appolicy-coffee.yml
 kubectl apply -f appolicy-tea.yml
 kubectl apply -f appolicy-cocoa.yml
+
+# 생성 확인
+kubectl get APPolicy -n nap
 ```
 
-## Step 3 - Deploy the NAP Log
+### Step 4 · 로그 설정 (`log.yml`)
 
-Create 1 log configuration for all policies:
+3개 정책이 공통으로 사용할 로그 설정입니다.  
+LAB 4.1에서 이미 적용된 설정과 동일하므로 `unchanged` 출력은 정상입니다.
 
-```
+```bash
 kubectl apply -f log.yml
+kubectl get APLogConf -n nap
 ```
 
-## Step 4 - Deploy the NGINX Policy
+### Step 5 · NGINX Policy 생성 (경로별 3개)
 
-Create the policy to reference the AP Policy that will reference the AP policy, the AP Log profile and the log destination.
+APPolicy + APLogConf를 묶어 NIC에 적용할 최종 Policy를 생성합니다.  
+로그는 Elasticsearch(Fluentd 경유)로 전송됩니다.
 
-```
+```bash
 kubectl apply -f policy-coffee.yml
 kubectl apply -f policy-tea.yml
 kubectl apply -f policy-cocoa.yml
+
+# 생성 확인
+kubectl get Policy.k8s.nginx.org -n nap
 ```
 
-## Step 5 - Configure VirtualServer resource
+---
 
-We will create the VirtualServer resource with the following configuration:
+## 4. VirtualServer 구성 및 배포
 
-- For path **/tea** go to service tea and use WAF policy **nap-tea**
-- For path **/coffee** go to service tea and use WAF policy **nap-coffee**
-- For everything else go to service cocoa and use WAF policy **nap-cocoa**
+### Step 6 · `virtual-server.yml` 구성 확인
 
-```yml
+경로별 정책 분기가 핵심입니다. YAML의 주석을 참고하세요.
+
+```bash
+cat virtual-server.yml
+```
+
+```yaml
 apiVersion: k8s.nginx.org/v1
 kind: VirtualServer
 metadata:
@@ -71,7 +111,7 @@ metadata:
 spec:
   host: nap-cafe.f5k8s.net
   policies:
-  - name: cocoa-policy     <----  Catch-all NAP Policy
+  - name: cocoa-policy        # Catch-all: 매칭되는 경로가 없을 때 적용
   upstreams:
   - name: cocoa
     service: cocoa-svc
@@ -81,90 +121,86 @@ spec:
     port: 80
   - name: tea
     service: tea-svc
-    port: 80  
+    port: 80
   routes:
-  - path: /
+  - path: /                   # 기본 경로 → cocoa 정책 적용
     action:
       pass: webapp
-  - path: /tea
+  - path: /tea                # /tea 경로 전용 정책
     policies:
-    - name: tea-policy            <---- NAP Policy for path /tea
+    - name: tea-policy
     action:
       pass: webapp
-  - path: /coffee
+  - path: /coffee             # /coffee 경로 전용 정책
     policies:
-    - name: coffee-policy         <---- NAP Policy for path /coffee
+    - name: coffee-policy
     action:
       pass: webapp
 ```
 
-Create the VirtualServer resource
+> **포인트:** 최상위 `policies`는 Catch-all 역할을 하며, 각 `routes` 안의 `policies`가 해당 경로에 우선 적용됩니다.
 
-```
+### Step 7 · VirtualServer 배포
+
+```bash
 kubectl apply -f virtual-server.yml
+
+# 배포 상태 확인
+kubectl get virtualserver.k8s.nginx.org -n nap
 ```
 
-## Step 6 - Test the Application
+---
 
-To access the application, curl the coffee and the tea services.
+## 5. 동작 확인
 
-Send a malicious request to the path /tea:
+XSS 공격 요청을 각 경로로 전송하여 정책이 올바르게 분리 적용되는지 확인합니다.
 
-```
+### `/tea` 경로 → `nap-tea` 정책 차단
+
+```bash
 curl "http://nap-cafe.f5k8s.net/tea/?user=<script>"
-
-#####################  Expected output  #######################
-<html>
-  <head>
-    <title>Request Rejected</title>
-  </head>
-  <body>
-    Blocked from NAP policy: NAP-TEA.<br><br>       <==== Verify the Policy name
-    Your support ID is: 4045204596866416688<br><br>
-  </body>
-</html>
 ```
 
-Send a malicious request to the path /tea:
-
+```html
+<html><head><title>Custom Reject Page</title></head>
+<body>Blocked from NAP policy: NAP-TEA
+<br><br>Your support ID is: 13956862429059552813</body></html>
 ```
+
+### `/coffee` 경로 → `nap-coffee` 정책 차단
+
+```bash
 curl "http://nap-cafe.f5k8s.net/coffee/?user=<script>"
-
-#####################  Expected output  #######################
-<html>
-  <head>
-    <title>Request Rejected</title>
-  </head>
-  <body>
-    Blocked from NAP policy: NAP-COFFEE.<br><br>       <==== Verify the Policy name
-    Your support ID is: 4045204596866416688<br><br>
-  </body>
-</html>
 ```
 
-Send a malicious request to a path other than `/tea` or `/coffee`:
-
+```html
+<html><head><title>Custom Reject Page</title></head>
+<body>Blocked from NAP policy: NAP-COFFEE
+<br><br>Your support ID is: 9293616283769441734</body></html>
 ```
+
+### 그 외 경로 (`/unknown`) → `nap-cocoa` 정책 차단 (Catch-all)
+
+```bash
 curl "http://nap-cafe.f5k8s.net/unknown/?user=<script>"
-
-#####################  Expected output  #######################
-<html>
-  <head>
-    <title>Request Rejected</title>
-  </head>
-  <body>
-    Blocked from NAP policy: NAP-COCOA.<br><br>       <==== Verify the Policy name
-    Your support ID is: 4045204596866416688<br><br>
-  </body>
-</html>
 ```
 
-## Step 7 - Review Logs
-
-To review the logs login to Grafana and search with the support ID. More information regarding NAP Grafana Dashboard can be found on the [**NAP Dashboard**](https://github.com/F5EMEA/oltra/tree/main/use-cases/app-protect/monitoring) lab
-
-***Clean up the environment (Optional)***
-
+```html
+<html><head><title>Custom Reject Page</title></head>
+<body>Blocked from NAP policy: NAP-COCOA
+<br><br>Your support ID is: 13980750205359556035</body></html>
 ```
-kubectl delete -f .
-```
+
+### 결과 요약
+
+| 요청 경로                 | 적용된 정책           | 차단 메시지  |
+| ------------------------- | --------------------- | ------------ |
+| `/tea/?user=<script>`     | nap-tea               | `NAP-TEA`    |
+| `/coffee/?user=<script>`  | nap-coffee            | `NAP-COFFEE` |
+| `/unknown/?user=<script>` | nap-cocoa (Catch-all) | `NAP-COCOA`  |
+
+경로별로 독립적인 WAF 정책이 올바르게 적용된 것을 확인했습니다.
+
+---
+
+*LAB 4.2 End*

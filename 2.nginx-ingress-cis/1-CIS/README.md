@@ -1,6 +1,19 @@
+# 1. CIS Deploy Lab 
 
 ## CIS Deploy 
 Kubernetes 에 F5 CIS Controller 를 배포하는 과정입니다. 
+
+### F5 BIG-IP - iRule 생성
+* iRule 추가 
+    ```Basic
+    when SERVER_CONNECTED {
+      TCP::respond "PROXY TCP[IP::version] [IP::client_addr] [clientside {IP::local_addr}] [TCP::client_port] [clientside {TCP::local_port}]\r\n"
+    }
+    ```
+* WEB-UI
+![irule](create-irule.png)
+
+<br>
 
 ### Helm Repo Add
 
@@ -12,6 +25,7 @@ Kubernetes 에 F5 CIS Controller 를 배포하는 과정입니다.
 
     ```Basic
     kubectl get secret -n bigip 
+    kubectl get secret -n bigip -oyaml
     ```
     ```yaml
     apiVersion: v1

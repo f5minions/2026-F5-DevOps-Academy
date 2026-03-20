@@ -5,9 +5,16 @@ Kubernetes Context 확인 (Client-vscode)
 
 * rahcner1 Context 에서 진행 
 
-
+    ```Basic
     kubectl config current-context 
-    rancher1 
+    rancher1
+
+    ## Context 확인
+    kubectl config get-contexts 
+    ## Context 변경
+    kubectl config use-context rahcner1
+    ```
+    
 
 
 

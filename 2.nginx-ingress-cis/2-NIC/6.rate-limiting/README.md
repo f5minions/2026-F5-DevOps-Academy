@@ -1,154 +1,58 @@
-# Rate Limiting
+# Ingress Controller Lab #6 - Rate-Limiting
 
-This use case applies rate limiting for an application exposed through NGINX Ingress Controller
+## Lab 개요 
+* NGINX Ingress Controller를 통해 노출된 애플리케이션에 대한 속도 제한(rate-limit)을 적용합니다.
 
-Get NGINX Ingress Controller Node IP, HTTP and HTTPS NodePorts
-```code
-export NIC_IP=`kubectl get pod -l app.kubernetes.io/instance=nic -n nginx-ingress -o json|jq '.items[0].status.hostIP' -r`
-export HTTP_PORT=`kubectl get svc nic-nginx-ingress-controller -n nginx-ingress -o jsonpath='{.spec.ports[0].nodePort}'`
-export HTTPS_PORT=`kubectl get svc nic-nginx-ingress-controller -n nginx-ingress -o jsonpath='{.spec.ports[1].nodePort}'`
-```
+* 랩의 결과 
+    - 기준치 이상의 트래픽 인입시 429 Return 처리 
 
-Check NGINX Ingress Controller IP address, HTTP and HTTPS ports
-```code
-echo -e "NIC address: $NIC_IP\nHTTP port  : $HTTP_PORT\nHTTPS port : $HTTPS_PORT"
-```
+<br>
 
-`cd` into the lab directory
-```code
-cd ~/NGINX-Ingress-Controller-Lab/labs/6.rate-limiting
-```
+---
+## 실습 
 
-Deploy the sample web applications
+### #1 샘플 서비스 배포
 ```code
 kubectl apply -f 0.webapp.yaml
 ```
 
-Deploy a rate limit policy that allows only 1 request per second from a single IP address
+### #2 샘플 정책 배포 - RateLimit 
 ```code
 kubectl apply -f 1.rate-limit.yaml
 ```
 
-Publish the application through NGINX Ingress Controller applying the rate limit policy
+### #3 NGINX Virtual Server 배포 
 ```code
 kubectl apply -f 2.virtual-server.yaml
 ```
 
-Check the newly created `VirtualServer` resource
+### #4 테스트 접속 수행
+* 배포된 Virtual Server 접속 - 429 Reponse 여부 확인 
+    ```code
+    curl webapp.vs.example.com
+
+    <html>
+    <head><title>429 Too Many Requests</title></head>
+    <body>
+    <center><h1>429 Too Many Requests</h1></center>
+    <hr><center>nginx/1.27.2</center>
+    </body>
+    </html>
+    ```
+
+### #5 샘플 정책 배포 - Ratelimit Mitigate
 ```code
-kubectl get vs -o wide
+kubectl apply -f 3.rate-limit-mitigate.yaml
 ```
 
-Output should be similar to
-```code
-NAME     STATE   HOST                 IP    EXTERNALHOSTNAME   PORTS   AGE
-webapp   Valid   webapp.example.com                                    4s
-```
+### #6 테스트 접속 수행
+* 완화 정책 배포된 Virtual Server 접속 - 지속적 정상 접속 가능 
+    ```code
+    curl webapp.vs.example.com
 
-Describe the `webapp` virtualserver
-```code
-kubectl describe vs webapp
-```
-
-Output should be similar to
-```
-Name:         webapp
-Namespace:    default
-Labels:       <none>
-Annotations:  <none>
-API Version:  k8s.nginx.org/v1
-Kind:         VirtualServer
-Metadata:
-  Creation Timestamp:  2025-04-03T20:47:29Z
-  Generation:          1
-  Resource Version:    248921
-  UID:                 e5ed98c5-10f0-4a0f-8a2b-cfe8e020d401
-Spec:
-  Host:  webapp.example.com
-  Policies:
-    Name:  rate-limit-policy
-  Routes:
-    Action:
-      Pass:  webapp
-    Path:    /
-  Upstreams:
-    Name:     webapp
-    Port:     80
-    Service:  webapp-svc
-Status:
-  Message:  Configuration for default/webapp was added or updated 
-  Reason:   AddedOrUpdated
-  State:    Valid
-Events:
-  Type    Reason          Age   From                      Message
-  ----    ------          ----  ----                      -------
-  Normal  AddedOrUpdated  22s   nginx-ingress-controller  Configuration for default/webapp was added or updated
-```
-
-Access the application
-```code
-curl -i -H "Host: webapp.example.com" http://$NIC_IP:$HTTP_PORT
-```
-
-Output should be similar to
-```
-HTTP/1.1 200 OK
-Server: nginx/1.27.2
-Date: Thu, 03 Apr 2025 20:48:16 GMT
-Content-Type: text/plain
-Content-Length: 158
-Connection: keep-alive
-Expires: Thu, 03 Apr 2025 20:48:15 GMT
-Cache-Control: no-cache
-
-Server address: 192.168.36.102:8080
-Server name: webapp-6db59b8dcc-pkfp8
-Date: 03/Apr/2025:20:48:16 +0000
-URI: /
-Request ID: 73dfb52a3cd42b4a6953ea4f3ac55e94
-```
-
-Access the application twice in rapid sequence
-```code
-curl -i -H "Host: webapp.example.com" http://$NIC_IP:$HTTP_PORT; curl -i -H "Host: webapp.example.com" http://$NIC_IP:$HTTP_PORT
-```
-
-The first request is served and the second is rate limited with HTTP code 429
-
-Output should be similar to
-```
-HTTP/1.1 200 OK
-Server: nginx/1.27.2
-Date: Thu, 03 Apr 2025 20:49:03 GMT
-Content-Type: text/plain
-Content-Length: 158
-Connection: keep-alive
-Expires: Thu, 03 Apr 2025 20:49:02 GMT
-Cache-Control: no-cache
-
-Server address: 192.168.36.102:8080
-Server name: webapp-6db59b8dcc-pkfp8
-Date: 03/Apr/2025:20:49:03 +0000
-URI: /
-Request ID: 7b431f3052bbdcfd6905c6875469bee3
-HTTP/1.1 429 Too Many Requests
-Server: nginx/1.27.2
-Date: Thu, 03 Apr 2025 20:49:03 GMT
-Content-Type: text/html
-Content-Length: 169
-Connection: keep-alive
-
-<html>
-<head><title>429 Too Many Requests</title></head>
-<body>
-<center><h1>429 Too Many Requests</h1></center>
-<hr><center>nginx/1.27.2</center>
-</body>
-</html>
-```
-
-Delete the lab
-
-```code
-kubectl delete -f .
-```
+    Server address: 10.221.0.59:8080
+    Server name: webapp-8598df94db-dmhrt
+    Date: 19/Mar/2026:09:13:16 +0000
+    URI: /
+    Request ID: f9e4fc1ac1dde39b238236d944476aa6
+    ```
