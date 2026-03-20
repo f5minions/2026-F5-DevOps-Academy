@@ -1,146 +1,75 @@
-# Basic Ingress Controller
+# Ingress Controller Lab #1 - Basic Ingress with CIS 
 
-This use case shows how to publish two sample applications using:
-
-- URI-based routing
-- TLS offload
-
-Get NGINX Ingress Controller Node IP, HTTP and HTTPS NodePorts
-```code
-export NIC_IP=`kubectl get pod -l app.kubernetes.io/instance=nic -n nginx-ingress -o json|jq '.items[0].status.hostIP' -r`
-export HTTP_PORT=`kubectl get svc nic-nginx-ingress-controller -n nginx-ingress -o jsonpath='{.spec.ports[0].nodePort}'`
-export HTTPS_PORT=`kubectl get svc nic-nginx-ingress-controller -n nginx-ingress -o jsonpath='{.spec.ports[1].nodePort}'`
-```
-
-Check NGINX Ingress Controller IP address, HTTP and HTTPS ports
-```code
-echo -e "NIC address: $NIC_IP\nHTTP port  : $HTTP_PORT\nHTTPS port : $HTTPS_PORT"
-```
-
-`cd` into the lab directory
-```code
-cd ~/NGINX-Ingress-Controller-Lab/labs/1.basic-ingress
-```
-
-Deploy two sample web applications
-```code
-kubectl apply -f 0.cafe.yaml
-```
-
-Verify that all pods are in the `Running` state
-
-```code
-kubectl get all
-```
-
-Output should be similar to
-
-```
-NAME                          READY   STATUS    RESTARTS   AGE
-pod/coffee-56b44d4c55-4v6jp   1/1     Running   0          32s
-pod/coffee-56b44d4c55-gdgdw   1/1     Running   0          32s
-pod/tea-596697966f-cc4zj      1/1     Running   0          28m
-pod/tea-596697966f-hbt7x      1/1     Running   0          28m
-pod/tea-596697966f-mhd9k      1/1     Running   0          28m
-
-NAME                 TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)   AGE
-service/coffee-svc   ClusterIP   172.20.10.229   <none>        80/TCP    28m
-service/kubernetes   ClusterIP   172.20.0.1      <none>        443/TCP   2d23h
-service/tea-svc      ClusterIP   172.20.169.88   <none>        80/TCP    28m
-
-NAME                     READY   UP-TO-DATE   AVAILABLE   AGE
-deployment.apps/coffee   2/2     2            2           32s
-deployment.apps/tea      3/3     3            3           28m
-
-NAME                                DESIRED   CURRENT   READY   AGE
-replicaset.apps/coffee-56b44d4c55   2         2         2       32s
-replicaset.apps/tea-596697966f      3         3         3       28m
-```
-
-Create TLS certificate and key to be used for TLS offload
-```code
-kubectl apply -f 1.cafe-secret.yaml
-```
-
-Publish `coffee` and `tea` through NGINX Ingress Controller using the `Ingress` resource
-```code
-kubectl apply -f 2.cafe-ingress.yaml
-```
-
-Check the newly created `Ingress` resource
-```code
-kubectl get ingress
-```
-
-Output should be similar to
-```code
-NAME           CLASS   HOSTS              ADDRESS   PORTS     AGE
-cafe-ingress   nginx   cafe.example.com             80, 443   13s
-```
-
-[Test](#test-application-access) application access
-
-Delete the `Ingress` resource
-
-```code
-kubectl delete -f 2.cafe-ingress.yaml
-```
-
-Publish `coffee` and `tea` through NGINX Ingress Controller using the `VirtualServer` Custom Resource Definition
-```code
-kubectl apply -f 3.cafe-virtualserver.yaml
-```
-
-Check the newly created `VirtualServer` resource
-```code
-kubectl get vs -o wide
-```
-
-Output should be similar to
-```code
-NAME   STATE   HOST               IP    EXTERNALHOSTNAME   PORTS   AGE
-cafe   Valid   cafe.example.com                                    52s
-```
-
-[Test](#test-application-access) application access
-
-Delete the lab
-
-```code
-kubectl delete -f .
-```
+## Lab 개요 
+* NGINX Ingrss Controller 를 통한 서비스 배포 ( Ingress / VirtualServer )
+* IngressLink 를 통한 F5 BIG-IP 와의 서비스 통합 
 
 
-# Test applications access
+* 랩의 결과 
+    - https://cafe.ing.example.com/coffee , /tea 접속
+    - https://cafe.vs.example.com/coffee, /tea 접속
+    - F5 BIGIP 에 IngressLink 서비스 배포 
 
-We will use `curl` with the `--insecure` option to turn off certificate verification of our
-self-signed certificate and the `--resolve` option to set the Host header and SNI of the request
-with `cafe.example.com`
 
-To access `coffee`
-```code
-curl --insecure --connect-to cafe.example.com:$HTTPS_PORT:$NIC_IP https://cafe.example.com:$HTTPS_PORT/coffee
-```
+## 코드 배포 
 
-Output should be similar to
-```code
-Server address: 192.168.36.95:8080
-Server name: coffee-56b44d4c55-57mll
-Date: 03/Apr/2025:17:52:49 +0000
-URI: /coffee
-Request ID: 955d316d90c3204040b07e00fe497bc8
-```
+### #1 Sample App 배포 
 
-To access `tea`
-```code
-curl --insecure --connect-to cafe.example.com:$HTTPS_PORT:$NIC_IP https://cafe.example.com:$HTTPS_PORT/tea
-```
+* 샘플 서비스로 활용할 Application 및 기본 Ingress / Virtual Server 리소스 배포 
+    ```Basic
+    kubectl apply -f 0.cafe.yaml
+    kubectl apply -f 1.cafe-secret.yaml
+    ```
+### #2 기본 Ingress 및 Virtual Server 배포 
 
-Output should be similar to
-```code
-Server address: 192.168.169.147:8080
-Server name: tea-596697966f-pnkqk
-Date: 03/Apr/2025:17:53:24 +0000
-URI: /tea
-Request ID: e4ffa71cff7fbf8d8dd3e36ce8e99085
-```
+* 서비스 배포 
+
+    ```Basic
+    kubectl apply -f 2.cafe-ingress.yaml
+    kubectl apply -f 3.cafe-virtualserver.yaml 
+    ```
+* 리소스 생성 여부 검증 
+
+    ```Basic
+    kubectl get ingress 
+    kubectl get virtualservers.k8s.nginx.org
+    ```
+
+### #3. Ingress Link 서비스 배포 
+
+* IngressLink 서비스 배포 
+    * k8s 에는 IngressLink 서비스를 생성하고, 
+    F5 BIG-IP 에는 해당 정보를 토대로 Virtual Server 등 리소스가 생성된다 
+    ```Basic
+    kubectl apply -f 4-ingresslink.yaml 
+    ```
+
+* 리소스 생성 여부 검증 
+    ```Basic
+    kubectl get ingresslink -A 
+
+    NAMESPACE   NAME            IPAMVSADDRESS   AGE
+    nginx       nginx-ingress   10.1.10.100     14m
+    ```
+
+### #4. 서비스 접속 테스트
+* 배포된 NGINX Ingress Controller / Virtual Server 에 대한 접속 시도 
+    ```Basic
+    * Ingress 서비스 접속
+    curl -k https://cafe.ing.example.com/coffee
+    curl -k https://cafe.ing.example.com/tea
+
+    * Virtual Server 서비스 접속
+    curl -k https://cafe.vs.example.com/coffee
+    curl -k https://cafe.vs.example.com/tea
+    ```
+
+### #5. F5 BIG-IP 상태 확인 
+
+* [Web] - [Local Traffic]-[Virtual Servers] - 우측 상단 파티션 k8s-1으로 설정 
+    * F5 BIG-IP 에 Virtual Server 생성 (10.1.10.100)
+![Lab](bigip3.png)
+
+* [Web] - [Local Traffic] - [Pools] 
+    * F5 BIG-IP 가 서비스 보내는 대상 (NGINX Ingress Controller)
+![Lab](bigip4.png)
