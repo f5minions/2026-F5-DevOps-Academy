@@ -47,9 +47,6 @@ F5 DevOps Academy Lab을 위해 구성된 활용사례들은 아래에서 확인
 - [**NGINX Gateway Fabric**](3.nginx-gateway-fabric/)
 - [**F5 WAF for NGINX**](4.f5-waf-for-nginx/)
 
-<br>
----
-
 ## 지원
 
 지원이 필요하신 경우 GitHub 이슈를 등록해 주세요. 이 저장소의 코드는 커뮤니티에서 지원하며, F5 Networks의 공식 지원 대상이 아닙니다. 지원되는 프로젝트의 전체 목록은 [SUPPORT.md](SUPPORT.md)를 참고하세요.
