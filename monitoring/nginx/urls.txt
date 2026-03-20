@@ -1,8 +1,0 @@
-/
-/index.php
-/images.png
-/portal
-/test
-/app2
-/app2
-/api
