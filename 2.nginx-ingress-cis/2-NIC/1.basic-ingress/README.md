@@ -6,12 +6,14 @@
 
 
 * 랩의 결과 
-    - https://cafe.ing.example.com/coffee , /tea 접속
-    - https://cafe.vs.example.com/coffee, /tea 접속
+    - https://cafe.ing.example.com/coffee 정상 접속
+    - https://cafe.ing.example.com/tea 정상 접속
+    - https://cafe.vs.example.com/coffee 정상 접속
+    - https://cafe.ing.example.com/tea 정상 접속 
     - F5 BIGIP 에 IngressLink 서비스 배포 
 
 
-## 코드 배포 
+## 실습
 
 ### #1 Sample App 배포 
 

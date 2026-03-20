@@ -12,27 +12,29 @@
 
 ---
 
-### 샘플 서비스 배포
+## 실습 
+
+### #1 샘플 서비스 배포 
 ```code
 kubectl apply -f 0.webapp.yaml
 ```
 
-### JWK Secret 배포
+### #2 JWK Secret 배포
 ```code
 kubectl apply -f 1.jwk-secret.yaml
 ```
 
-### JWT Policy 배포 
+### #3 JWT Policy 배포 
 ```code
 kubectl apply -f 2.jwt-policy.yaml
 ```
 
-### NGINX Virtual Server 배포 
+### #4 NGINX Virtual Server 배포 
 ```code
 kubectl apply -f 3.virtual-server.yaml
 ```
 
-### 테스트 접속 수행
+### #5 테스트 접속 수행
 * 초도 접속 수행 -> 401 CODE 
 ```code
 curl http://webapp.vs.example.com

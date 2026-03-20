@@ -10,19 +10,20 @@
 <br>
 
 ---
+## 실습 
 
-### 샘플 서비스 배포
+### #1 샘플 서비스 배포 
 ```code
 kubectl apply -f 0.cafe.yaml
 ```
 
 
-### NGINX Virtual Server 배포 
+### #2 NGINX Virtual Server 배포 
 ```code
 kubectl apply -f 1.virtual-server.yaml
 ```
 
-### 테스트 접속 수행
+### #3 테스트 접속 수행
 * 스크립트를 통한 접속 수행 ( 총 100회 접속 ) 
 ```code
 bash test.sh

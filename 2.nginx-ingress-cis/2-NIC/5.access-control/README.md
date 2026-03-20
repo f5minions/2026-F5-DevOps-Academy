@@ -3,7 +3,7 @@
 ## Lab 개요 
 * 특정 서브넷에서 들어오는 트래픽을 허용하거나 차단하기 위해 액세스 제어 정책을 적용합니다.
 
-* 랩의 결과 
+* 실습 결과 
     - `coffee-v1-svc`와 `coffee-v2-svc`라는 두 개의 서비스를 가진 샘플 애플리케이션에 대한 트래픽 분할을 구성
     - `coffee` 애플리케이션 트래픽의 90%는 `coffee-v1-svc`로, 나머지 10%는 `coffee-v2-svc`로 전송됩니다.
 
@@ -11,22 +11,24 @@
 
 ---
 
-### 샘플 서비스 배포
+## 실습 
+
+### #1 샘플 서비스 배포
 ```code
 kubectl apply -f 0.webapp.yaml
 ```
 
-### 샘플 정책 배포 - Deny 
+### #2 샘플 정책 배포 - Access Deny 
 ```code
 kubectl apply -f 1.access-control-policy-deny.yaml
 ```
 
-### NGINX Virtual Server 배포 
+### #3 NGINX Virtual Server 배포 
 ```code
 kubectl apply -f 2.virtual-server.yaml
 ```
 
-### 테스트 접속 수행
+### #4 테스트 접속 수행
 * 배포된 Virtual Server 접속 
     ```code
     curl webapp.vs.example.com
@@ -40,12 +42,12 @@ kubectl apply -f 2.virtual-server.yaml
     </html>
     ```
 
-### 샘플 정책 배포 - Allow
+### #5 샘플 정책 배포 - Access Allow
 ```code
 kubectl apply -f 3.access-control-policy-allow.yaml
 ```
 
-### 테스트 접속 수행
+### #6 테스트 접속 수행
 * allow 정책 배포된 Virtual Server 접속 
     ```code
     curl webapp.vs.example.com

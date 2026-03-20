@@ -9,23 +9,24 @@
 <br>
 
 ---
+## 실습 
 
-### 샘플 서비스 배포
+### #1 샘플 서비스 배포
 ```code
 kubectl apply -f 0.webapp.yaml
 ```
 
-### 샘플 정책 배포 - Deny 
+### #2 샘플 정책 배포 - RateLimit 
 ```code
 kubectl apply -f 1.rate-limit.yaml
 ```
 
-### NGINX Virtual Server 배포 
+### #3 NGINX Virtual Server 배포 
 ```code
 kubectl apply -f 2.virtual-server.yaml
 ```
 
-### 테스트 접속 수행
+### #4 테스트 접속 수행
 * 배포된 Virtual Server 접속 - 429 Reponse 여부 확인 
     ```code
     curl webapp.vs.example.com
@@ -39,12 +40,12 @@ kubectl apply -f 2.virtual-server.yaml
     </html>
     ```
 
-### 샘플 정책 배포 - Allow
+### #5 샘플 정책 배포 - Ratelimit Mitigate
 ```code
 kubectl apply -f 3.rate-limit-mitigate.yaml
 ```
 
-### 테스트 접속 수행
+### #6 테스트 접속 수행
 * 완화 정책 배포된 Virtual Server 접속 - 지속적 정상 접속 가능 
     ```code
     curl webapp.vs.example.com
