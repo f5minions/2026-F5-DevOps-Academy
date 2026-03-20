@@ -36,36 +36,36 @@ kubectl apply -f 3.virtual-server.yaml
 
 ### #5 테스트 접속 수행
 * 초도 접속 수행 -> 401 CODE 
-```code
-curl http://webapp.vs.example.com
+    ```code
+    curl http://webapp.vs.example.com
 
-<html>
-<head><title>401 Authorization Required</title></head>
-<body>
-<center><h1>401 Authorization Required</h1></center>
-<hr><center>nginx/1.27.2</center>
-</body>
-</html>
-```
+    <html>
+    <head><title>401 Authorization Required</title></head>
+    <body>
+    <center><h1>401 Authorization Required</h1></center>
+    <hr><center>nginx/1.27.2</center>
+    </body>
+    </html>
+    ```
 * 2차 접속 수행 (with JWT Token) 
-```code
-curl http://webapp.vs.example.com -H "token: `cat token.jwt`"
+    ```code
+    curl http://webapp.vs.example.com -H "token: `cat token.jwt`"
 
-Server address: 10.221.0.59:8080
-Server name: webapp-8598df94db-dmhrt
-Date: 19/Mar/2026:08:59:23 +0000
-URI: /
-Request ID: 34e2d9643613ed57f5149605cf3a7c2b
-```
+    Server address: 10.221.0.59:8080
+    Server name: webapp-8598df94db-dmhrt
+    Date: 19/Mar/2026:08:59:23 +0000
+    URI: /
+    Request ID: 34e2d9643613ed57f5149605cf3a7c2b
+    ```
 * 3차 접속 수행 (with Abnormal JWT Token) 
-```code
-curl http://webapp.vs.example.com -H "token: `cat wrong.jwt`"
+    ```code
+    curl http://webapp.vs.example.com -H "token: `cat wrong.jwt`"
 
-<html>
-<head><title>401 Authorization Required</title></head>
-<body>
-<center><h1>401 Authorization Required</h1></center>
-<hr><center>nginx/1.27.2</center>
-</body>
-</html>
-```
+    <html>
+    <head><title>401 Authorization Required</title></head>
+    <body>
+    <center><h1>401 Authorization Required</h1></center>
+    <hr><center>nginx/1.27.2</center>
+    </body>
+    </html>
+    ```
