@@ -1,4 +1,4 @@
-# Publishing a FastCGI application using SnippetsFilter
+# SnippetsFilter를 이용한 FastCGI 애플리케이션 배포
 
 이번 실습에서는 SnippetsFilter를 통해 FastCGI 인터페이스를 사용하여 샘플 PHP 애플리케이션을 게시하는 방법을 경험할 수 있습니다.
 
