@@ -17,6 +17,13 @@ spec:
         image: nginxdemos/nginx-hello:plain-text
         ports:
         - containerPort: 8080
+        resources:
+          requests:
+            cpu: 10m
+            memory: 64Mi
+          limits:
+            cpu: 100m
+            memory: 128Mi
 ---
 apiVersion: v1
 kind: Service
@@ -24,7 +31,7 @@ metadata:
   name: coffee
 spec:
   ports:
-  - port: 8080
+  - port: 8090
     targetPort: 8080
     protocol: TCP
     name: http
@@ -75,3 +82,7 @@ spec:
         resources:
           requests:
             cpu: 10m
+            memory: 64Mi
+          limits:
+            cpu: 100m
+            memory: 128Mi
