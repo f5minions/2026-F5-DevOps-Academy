@@ -269,6 +269,8 @@ NGINX Gateway Fabric은 NGINX OSS와 NGINX Plus를 모두 지원합니다. NGINX
 
 ## 설치
 
+> **주의: 공개 리포지토리의 라이센스 문제로 인해 1번~4번까지의 과정은 이미 Kubernetes에 적용이 되어 있기 때문에 따로 수행할 필요가 없습니다. 5번 CRD 배포부터 Lab을 진행하시면 됩니다.**
+
 ### 1. NGINX Gateway Fabric 네임스페이스 생성
 
 ```code
