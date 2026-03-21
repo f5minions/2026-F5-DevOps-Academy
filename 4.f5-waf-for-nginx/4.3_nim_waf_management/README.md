@@ -166,7 +166,7 @@ API 요청 Body에 아래 JSON을 그대로 입력합니다. JSON 파일은 `~/A
 NIM UI에서 해당 인스턴스의 설정 파일을 편집하여 아래 내용을 추가합니다.
 
 ```nginx
-# 최상단: NAP 모듈 로드
+# 최상단: NAP 모듈 로드 (이미 구성되어 있음)
 load_module modules/ngx_http_app_protect_module.so;
 
 http {
