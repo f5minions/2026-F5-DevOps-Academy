@@ -71,6 +71,12 @@ kubectl config use-context rancher1
 cd ~/2026-F5-DevOps-Academy/4.f5-waf-for-nginx/4.1_nic_waf
 ```
 
+```bash
+# Host 파일에 nap.f5k8s.net 도메인 추가
+sudo vi /etc/hosts
+
+10.1.10.100 cafe.ing.example.com cafe.vs.example.com webapp.vs.example.com nap.f5k8s.net
+```
 ---
 
 ### 배포 파일 요약
@@ -207,6 +213,8 @@ kubectl get virtualserver.k8s.nginx.org -n nap
 ### Step 6 · 동작 확인
 
 **정상 요청 테스트:**
+
+> CIS, NIC가 정상적으로 배포되어야 하며, IngressLink 서비스가 없으면 연결되지 않습니다.
 
 ```bash
 curl http://nap.f5k8s.net/
