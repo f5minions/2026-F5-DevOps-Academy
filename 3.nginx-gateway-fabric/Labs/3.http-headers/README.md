@@ -4,7 +4,7 @@ This use case shows how to modify HTTP headers
 
 `cd` into the lab directory
 ```code
-cd ~/NGINX-Gateway-Fabric-Lab/labs/3.http-headers
+cd ~/3.nginx-gateway-fabric/labs/labs/3.http-headers
 ```
 
 Deploy the sample application

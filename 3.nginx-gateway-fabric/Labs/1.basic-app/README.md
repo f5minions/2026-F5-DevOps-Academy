@@ -4,7 +4,7 @@ This use case shows how to publish two sample applications using URI-based routi
 
 `cd` into the lab directory
 ```code
-cd ~/NGINX-Gateway-Fabric-Lab/labs/1.basic-app
+cd ~/3.nginx-gateway-fabric/labs/labs/1.basic-app
 ```
 
 Deploy two sample web applications

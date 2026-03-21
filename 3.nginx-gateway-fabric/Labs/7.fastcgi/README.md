@@ -4,7 +4,7 @@ This use case shows how to publish a sample PHP application using the FastCGI in
 
 `cd` into the lab directory
 ```code
-cd ~/NGINX-Gateway-Fabric-Lab/labs/7.fastcgi
+cd ~/3.nginx-gateway-fabric/labs/labs/7.fastcgi
 ```
 
 Deploy the sample PHP application

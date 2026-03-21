@@ -4,7 +4,7 @@ This use case shows how to enforce JWT authentication through SnippetsFilter
 
 `cd` into the lab directory
 ```code
-cd ~/NGINX-Gateway-Fabric-Lab/labs/8.auth-jwt
+cd ~/3.nginx-gateway-fabric/labs/labs/8.auth-jwt
 ```
 
 Deploy the sample application
