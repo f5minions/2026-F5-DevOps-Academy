@@ -3,11 +3,13 @@
 This use case shows how to enforce JWT authentication through SnippetsFilter
 
 `cd` into the lab directory
+
 ```code
-cd 3.nginx-gateway-fabric/labs/labs/8.auth-jwt
+cd 3.nginx-gateway-fabric/labs/8.auth-jwt
 ```
 
 Deploy the sample application
+
 ```code
 kubectl apply -f 0.coffee.yaml
 ```
@@ -36,16 +38,19 @@ replicaset.apps/coffee-56b44d4c55   1         1         1       3s
 ```
 
 Create the gateway object. This deploys the NGINX Gateway Fabric dataplane pod in the current namespace
+
 ```code
 kubectl apply -f 1.gateway.yaml
 ```
 
 Check the NGINX Gateway Fabric dataplane pod status
+
 ```
 kubectl get pods
 ```
 
 `gateway-nginx-56678b747f-rrx4d` is the NGINX Gateway Fabric dataplane pod
+
 ```
 NAME                             READY   STATUS    RESTARTS   AGE
 coffee-56b44d4c55-g9gtj          1/1     Running   0          37s
@@ -53,22 +58,26 @@ gateway-nginx-56678b747f-rrx4d   1/1     Running   0          13s
 ```
 
 Check the gateway
+
 ```code
 kubectl get gateway
 ```
 
 Output should be similar to
+
 ```code
 NAME      CLASS   ADDRESS       PROGRAMMED   AGE
 gateway   nginx   10.97.70.64   True         98s
 ```
 
 Check the NGINX Gateway Fabric Service
+
 ```code
 kubectl get service
 ```
 
 `gateway-nginx` is the NGINX Gateway Fabric dataplane service
+
 ```code
 NAME            TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)        AGE
 coffee          ClusterIP   10.107.232.5   <none>        80/TCP         2m17s
@@ -77,16 +86,19 @@ kubernetes      ClusterIP   10.96.0.1      <none>        443/TCP        385d
 ```
 
 Create the SnippetsFilter to set up the FastCGI configuration snippets
+
 ```code
 kubectl apply -f 2.snippetsfilter-jwtauth.yaml
 ```
 
 Check the SnippetsFilter
+
 ```code
 kubectl describe snippetsfilter auth-jwt
 ```
 
 Output should be similar to
+
 ```code
 Name:         auth-jwt
 Namespace:    default
@@ -119,38 +131,45 @@ Events:                      <none>
 ```
 
 Create the HTTP route that references the SnippetsFilter
+
 ```code
 kubectl apply -f 3.httproute.yaml
 ```
 
 Check the HTTP route
+
 ```code
 kubectl get httproute
 ```
 
 Output should be similar to
+
 ```code
 NAME     HOSTNAMES              AGE
 coffee   ["cafe.example.com"]   4s
 ```
 
 Get NGINX Gateway Fabric dataplane instance IP and HTTP port
+
 ```code
 export NGF_IP=`kubectl get pod -l app.kubernetes.io/instance=ngf -o json|jq '.items[0].status.hostIP' -r`
 export HTTP_PORT=`kubectl get svc gateway-nginx -o jsonpath='{.spec.ports[0].nodePort}'`
 ```
 
 Check NGINX Gateway Fabric dataplane instance IP and HTTP port
+
 ```code
 echo -e "NGF address: $NGF_IP\nHTTP port  : $HTTP_PORT"
 ```
 
 Access the application without providing an authentication token
+
 ```code
 curl -i --resolve cafe.example.com:$HTTP_PORT:$NGF_IP http://cafe.example.com:$HTTP_PORT
 ```
 
 Output should be similar to
+
 ```code
 HTTP/1.1 401 Unauthorized
 Server: nginx
@@ -170,11 +189,13 @@ WWW-Authenticate: Bearer realm="JWT token required"
 ```
 
 Access the application again sending a valid JWT token
+
 ```code
 curl -i --resolve cafe.example.com:$HTTP_PORT:$NGF_IP http://cafe.example.com:$HTTP_PORT -H "Authorization: Bearer `cat token.jwt`"
 ```
 
 Output should be similar to
+
 ```code
 HTTP/1.1 200 OK
 Server: nginx

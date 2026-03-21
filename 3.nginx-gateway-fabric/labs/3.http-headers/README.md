@@ -3,11 +3,13 @@
 This use case shows how to modify HTTP headers
 
 `cd` into the lab directory
+
 ```code
-cd 3.nginx-gateway-fabric/labs/labs/3.http-headers
+cd 3.nginx-gateway-fabric/labs/3.http-headers
 ```
 
 Deploy the sample application
+
 ```code
 kubectl apply -f 0.app.yaml
 ```
@@ -36,16 +38,19 @@ replicaset.apps/headers-67f468496f   1         1         1       18s
 ```
 
 Create the gateway object. This deploys the NGINX Gateway Fabric dataplane pod in the current namespace
+
 ```code
 kubectl apply -f 1.gateway.yaml
 ```
 
 Check the NGINX Gateway Fabric dataplane pod status
+
 ```
 kubectl get pods
 ```
 
 `gateway-nginx-c9bcdf4d4-j9pw5` pod is the NGINX Gateway Fabric dataplane
+
 ```code
 NAME                            READY   STATUS    RESTARTS   AGE
 gateway-nginx-c9bcdf4d4-j9pw5   1/1     Running   0          49s
@@ -53,22 +58,26 @@ headers-67f468496f-ncf8s        1/1     Running   0          92s
 ```
 
 Check the gateway
+
 ```code
 kubectl get gateway
 ```
 
 Output should be similar to
+
 ```code
 NAME      CLASS   ADDRESS      PROGRAMMED   AGE
 gateway   nginx   10.99.25.2   True         4s
 ```
 
 Check the NGINX Gateway Fabric Service
+
 ```code
 kubectl get service
 ```
 
 `gateway-nginx` is the NGINX Gateway Fabric dataplane service
+
 ```code
 NAME            TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)        AGE
 gateway-nginx   NodePort    10.99.25.2       <none>        80:30344/TCP   4m19s
@@ -77,37 +86,45 @@ kubernetes      ClusterIP   10.96.0.1        <none>        443/TCP        268d
 ```
 
 Create the HTTP routes
+
 ```code
 kubectl apply -f 2.httproute.yaml
 ```
 
 Check the HTTP routes
+
 ```code
 kubectl get httproute
 ```
 
 Output should be similar to
+
 ```code
 NAME      HOSTNAMES              AGE
 headers   ["echo.example.com"]   3s
 ```
 
 Get NGINX Gateway Fabric dataplane instance IP and HTTP port
+
 ```code
 export NGF_IP=`kubectl get pod -l app.kubernetes.io/instance=ngf -o json|jq '.items[0].status.hostIP' -r`
 export HTTP_PORT=`kubectl get svc gateway-nginx -o jsonpath='{.spec.ports[0].nodePort}'`
 ```
 
 Check NGINX Gateway Fabric dataplane instance IP and HTTP port
+
 ```code
 echo -e "NGF address: $NGF_IP\nHTTP port  : $HTTP_PORT"
 ```
 
 Access the test application
+
 ```code
 curl -i --resolve echo.example.com:$HTTP_PORT:$NGF_IP http://echo.example.com:$HTTP_PORT/nofilter -H "My-Cool-Header:my-client-value" -H "My-Overwrite-Header:dont-see-this" 
 ```
+
 Output should be similar to
+
 ```code
 HTTP/1.1 200 OK
 Server: nginx
@@ -139,13 +156,14 @@ Request headers of note:
 
 Response Headers `X-Header-Set` and `X-Header-Add` are not present.
 
-
 Access the test application via filters route
+
 ```code
 curl -i --resolve echo.example.com:$HTTP_PORT:$NGF_IP http://echo.example.com:$HTTP_PORT/headers -H "My-Cool-Header:my-client-value" -H "My-Overwrite-Header:dont-see-this" 
 ```
 
 Output should be similar to
+
 ```code
 HTTP/1.1 200 OK
 Server: nginx

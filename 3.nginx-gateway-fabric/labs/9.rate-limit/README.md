@@ -3,11 +3,13 @@
 This use case shows how to set rate limits for HTTP and gRPC routes
 
 `cd` into the lab directory
+
 ```code
-cd 3.nginx-gateway-fabric/labs/labs/9.rate-limit
+cd 3.nginx-gateway-fabric/labs/9.rate-limit
 ```
 
 Deploy the sample applications
+
 ```code
 kubectl apply -f 0.apps.yaml
 ```
@@ -41,16 +43,19 @@ replicaset.apps/grpc-backend-68ff5cb6c9   1         1         1       40s
 ```
 
 Create the gateway object. This deploys the NGINX Gateway Fabric dataplane pod in the current namespace and a `RateLimitPolicy`
+
 ```code
 kubectl apply -f 1.gateway.yaml
 ```
 
 Check the NGINX Gateway Fabric dataplane pod status
+
 ```
 kubectl get pods
 ```
 
 `gateway-nginx-7b79d89c-p8v8v` is the NGINX Gateway Fabric dataplane pod
+
 ```
 NAME                            READY   STATUS    RESTARTS   AGE
 coffee-56b44d4c55-gdxkc         1/1     Running   0          89s
@@ -59,22 +64,26 @@ grpc-backend-68ff5cb6c9-c565t   1/1     Running   0          88s
 ```
 
 Check the gateway
+
 ```code
 kubectl get gateway
 ```
 
 Output should be similar to
+
 ```code
 NAME      CLASS   ADDRESS       PROGRAMMED   AGE
 gateway   nginx   10.97.59.36   True         31s
 ```
 
 Check the NGINX Gateway Fabric Service
+
 ```code
 kubectl get service
 ```
 
 `gateway-nginx` is the NGINX Gateway Fabric dataplane service
+
 ```code
 NAME            TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)           AGE
 coffee          ClusterIP   10.97.137.125   <none>        80/TCP            13m
@@ -85,22 +94,26 @@ nginx-svc       ClusterIP   10.101.127.99   <none>        80/TCP,8080/TCP   13d
 ```
 
 Check the rate limit policy set at the gateway level
+
 ```code
 kubectl get ratelimitpolicy
 ```
 
 Output should be similar to
+
 ```code
 NAME                 AGE
 gateway-rate-limit   107s
 ```
 
 Describe the `RateLimitPolicy`: it enforces a rate limit of 10 requests per second at the gateway level
+
 ```code
 kubectl describe RateLimitPolicy gateway-rate-limit
 ```
 
 Output should be similar to
+
 ```code
 Name:         gateway-rate-limit
 Namespace:    default
@@ -143,16 +156,19 @@ Events:                      <none>
 ```
 
 Create the HTTP and gRPC routes
+
 ```code
 kubectl apply -f 2.routes.yaml
 ```
 
 Check the HTTP route
+
 ```code
 kubectl get httproute
 ```
 
 Output should be similar to
+
 ```code
 NAME     HOSTNAMES              AGE
 coffee   ["cafe.example.com"]   82s
@@ -165,22 +181,26 @@ kubectl get grpcroute
 ```
 
 Output should be similar to
+
 ```code
 NAME         HOSTNAMES              AGE
 grpc-route   ["grpc.example.com"]   113s
 ```
 
 Create the `RateLimitPolicy` attached to the coffee `HTTPRoute` and the grpc-route `GRPCRoute`
+
 ```code
 kubectl apply -f 3.route-ratelimit.yaml
 ```
 
 Check all rate limit policies
+
 ```code
 kubectl get ratelimitpolicy
 ```
 
 Output should be similar to
+
 ```code
 NAME                 AGE
 gateway-rate-limit   8m24s
@@ -188,11 +208,13 @@ route-rate-limit     81s
 ```
 
 Describe the `RateLimitPolicy` applied at the `HTTPRoute` and `GRPCRoute` level
+
 ```code
 kubectl describe ratelimitpolicy route-rate-limit
 ```
 
 Output should be similar to
+
 ```code
 Name:         route-rate-limit
 Namespace:    default
@@ -252,22 +274,26 @@ Events:                      <none>
 ```
 
 Get NGINX Gateway Fabric dataplane instance IP and HTTP port
+
 ```code
 export NGF_IP=`kubectl get pod -l app.kubernetes.io/instance=ngf -o json|jq '.items[0].status.hostIP' -r`
 export HTTP_PORT=`kubectl get svc gateway-nginx -o jsonpath='{.spec.ports[0].nodePort}'`
 ```
 
 Check NGINX Gateway Fabric dataplane instance IP and HTTP port
+
 ```code
 echo -e "NGF address: $NGF_IP\nHTTP port  : $HTTP_PORT"
 ```
 
 Access the HTTP application once
+
 ```code
 curl -i --resolve cafe.example.com:$HTTP_PORT:$NGF_IP http://cafe.example.com:$HTTP_PORT/coffee
 ```
 
 Output should be similar to
+
 ```code
 HTTP/1.1 200 OK
 Server: nginx
@@ -286,11 +312,13 @@ Request ID: 03f15068dc0890cc33ac117322041ecc
 ```
 
 Access the application twice
+
 ```code
 curl -i --resolve cafe.example.com:$HTTP_PORT:$NGF_IP http://cafe.example.com:$HTTP_PORT/coffee;echo "---";curl -i --resolve cafe.example.com:$HTTP_PORT:$NGF_IP http://cafe.example.com:$HTTP_PORT/coffee
 ```
 
 Output should be similar to
+
 ```code
 HTTP/1.1 200 OK
 Server: nginx
@@ -324,11 +352,13 @@ Connection: keep-alive
 ```
 
 Access the gRPC application once
+
 ```code
 grpcurl -plaintext -proto grpc.proto -authority grpc.example.com -d '{"name": "exact"}' $NGF_IP:$HTTP_PORT helloworld.Greeter/SayHello
 ```
 
 Output should be similar to
+
 ```code
 {
   "message": "Hello exact"
@@ -336,11 +366,13 @@ Output should be similar to
 ```
 
 Access the gRPC application twice
+
 ```code
 grpcurl -plaintext -proto grpc.proto -authority grpc.example.com -d '{"name": "exact"}' $NGF_IP:$HTTP_PORT helloworld.Greeter/SayHello;echo "---";grpcurl -plaintext -proto grpc.proto -authority grpc.example.com -d '{"name": "exact"}' $NGF_IP:$HTTP_PORT helloworld.Greeter/SayHello
 ```
 
 Output should be similar to
+
 ```code
 {
   "message": "Hello exact"

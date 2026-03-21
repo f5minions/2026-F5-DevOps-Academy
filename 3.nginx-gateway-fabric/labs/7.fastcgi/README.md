@@ -3,11 +3,13 @@
 This use case shows how to publish a sample PHP application using the FastCGI interface through SnippetsFilter
 
 `cd` into the lab directory
+
 ```code
-cd 3.nginx-gateway-fabric/labs/labs/7.fastcgi
+cd 3.nginx-gateway-fabric/labs/7.fastcgi
 ```
 
 Deploy the sample PHP application
+
 ```code
 kubectl apply -f 0.phpapp.yaml
 ```
@@ -36,16 +38,19 @@ replicaset.apps/php-fpm-7f8d9d598c   1         1         1       4s
 ```
 
 Create the gateway object. This deploys the NGINX Gateway Fabric dataplane pod in the current namespace
+
 ```code
 kubectl apply -f 1.gateway.yaml
 ```
 
 Check the NGINX Gateway Fabric dataplane pod status
+
 ```
 kubectl get pods
 ```
 
 `gateway-nginx-56678b747f-f6h2w` is the NGINX Gateway Fabric dataplane
+
 ```
 NAME                             READY   STATUS    RESTARTS   AGE
 gateway-nginx-56678b747f-f6h2w   1/1     Running   0          82s
@@ -53,22 +58,26 @@ php-fpm-7f8d9d598c-wqsj9         1/1     Running   0          2m27s
 ```
 
 Check the gateway
+
 ```code
 kubectl get gateway
 ```
 
 Output should be similar to
+
 ```code
 NAME      CLASS   ADDRESS         PROGRAMMED   AGE
 gateway   nginx   10.96.234.240   True         113s
 ```
 
 Check the NGINX Gateway Fabric Service
+
 ```code
 kubectl get service
 ```
 
 `cafe-nginx` is the NGINX Gateway Fabric dataplane service
+
 ```code
 NAME            TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)        AGE
 gateway-nginx   NodePort    10.96.234.240    <none>        80:31933/TCP   2m23s
@@ -77,16 +86,19 @@ php-fpm         ClusterIP   10.111.251.242   <none>        9000/TCP       3m27s
 ```
 
 Create the SnippetsFilter to set up the FastCGI configuration snippets
+
 ```code
 kubectl apply -f 2.snippetsfilter-fastcgi.yaml
 ```
 
 Check the SnippetsFilter
+
 ```code
 kubectl describe snippetsfilter fastcgi
 ```
 
 Output should be similar to
+
 ```code
 Name:         fastcgi
 Namespace:    default
@@ -107,38 +119,45 @@ Events:       <none>
 ```
 
 Create the HTTP route that references the SnippetsFilter
+
 ```code
 kubectl apply -f 3.httproute.yaml
 ```
 
 Check the HTTP route
+
 ```code
 kubectl get httproute
 ```
 
 Output should be similar to
+
 ```code
 NAME      HOSTNAMES             AGE
 php-fpm   ["php.example.com"]   13s
 ```
 
 Get NGINX Gateway Fabric dataplane instance IP and HTTP port
+
 ```code
 export NGF_IP=`kubectl get pod -l app.kubernetes.io/instance=ngf -o json|jq '.items[0].status.hostIP' -r`
 export HTTP_PORT=`kubectl get svc gateway-nginx -o jsonpath='{.spec.ports[0].nodePort}'`
 ```
 
 Check NGINX Gateway Fabric dataplane instance IP and HTTP port
+
 ```code
 echo -e "NGF address: $NGF_IP\nHTTP port  : $HTTP_PORT"
 ```
 
 Access the PHP application
+
 ```code
 curl -si --resolve php.example.com:$HTTP_PORT:$NGF_IP http://php.example.com:$HTTP_PORT/phpinfo.php
 ```
 
 Output should be similar to
+
 ```code
 HTTP/1.1 200 OK
 Server: nginx

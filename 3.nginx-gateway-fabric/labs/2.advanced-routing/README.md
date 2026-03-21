@@ -3,11 +3,13 @@
 This use case shows how to publish two sample applications using HTTP matching conditions routing
 
 `cd` into the lab directory
+
 ```code
-cd 3.nginx-gateway-fabric/labs/labs/2.advanced-routing
+cd 3.nginx-gateway-fabric/labs/2.advanced-routing
 ```
 
 Deploy two sample web applications
+
 ```code
 kubectl apply -f 0.coffee.yaml
 kubectl apply -f 1.tea.yaml
@@ -57,16 +59,19 @@ replicaset.apps/tea-post-5647b8d885     1         1         1       91s
 ```
 
 Create the gateway object. This deploys the NGINX Gateway Fabric dataplane pod in the current namespace
+
 ```code
 kubectl apply -f 2.gateway.yaml
 ```
 
 Check the NGINX Gateway Fabric dataplane pod status
+
 ```
 kubectl get pods
 ```
 
 `cafe-nginx-7444846d75-cgmms` pod is the NGINX Gateway Fabric dataplane
+
 ```
 NAME                          READY   STATUS    RESTARTS   AGE
 cafe-nginx-7444846d75-cgmms   1/1     Running   0          113s
@@ -78,22 +83,26 @@ tea-post-5647b8d885-5xxvf     1/1     Running   0          113s
 ```
 
 Check the gateway
+
 ```code
 kubectl get gateway
 ```
 
 Output should be similar to
+
 ```code
 NAME   CLASS   ADDRESS         PROGRAMMED   AGE
 cafe   nginx   10.103.90.239   True         2m43s
 ```
 
 Check the NGINX Gateway Fabric Service
+
 ```code
 kubectl get service
 ```
 
 `cafe-nginx` is the NGINX Gateway Fabric dataplane service
+
 ```code
 NAME            TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)        AGE
 cafe-nginx      NodePort    10.103.90.239    <none>        80:31436/TCP   28s
@@ -106,16 +115,19 @@ tea-svc         ClusterIP   10.102.222.60    <none>        80/TCP         28s
 ```
 
 Create the HTTP routes
+
 ```code
 kubectl apply -f 3.cafe-routes.yaml
 ```
 
 Check the HTTP routes
+
 ```code
 kubectl get httproute
 ```
 
 Output should be similar to
+
 ```code
 NAME     HOSTNAMES              AGE
 coffee   ["cafe.example.com"]   8s
@@ -123,22 +135,26 @@ tea      ["cafe.example.com"]   8s
 ```
 
 Get NGINX Gateway Fabric dataplane instance IP and HTTP port
+
 ```code
 export NGF_IP=`kubectl get pod -l app.kubernetes.io/instance=ngf -o json|jq '.items[0].status.hostIP' -r`
 export HTTP_PORT=`kubectl get svc cafe-nginx -o jsonpath='{.spec.ports[0].nodePort}'`
 ```
 
 Check NGINX Gateway Fabric dataplane instance IP and HTTP port
+
 ```code
 echo -e "NGF address: $NGF_IP\nHTTP port  : $HTTP_PORT"
 ```
 
 Access `coffee-v1`
+
 ```code
 curl --resolve cafe.example.com:$HTTP_PORT:$NGF_IP http://cafe.example.com:$HTTP_PORT/coffee
 ```
 
 Output should be similar to
+
 ```code
 Server address: 10.0.156.109:8080
 Server name: coffee-v1-c48b96b65-5trnr
@@ -148,11 +164,13 @@ Request ID: 1a0b8a08ec4f94f6a5f02e7649165b18
 ```
 
 Access `coffee-v2` using a query string
+
 ```code
 curl --resolve cafe.example.com:$HTTP_PORT:$NGF_IP http://cafe.example.com:$HTTP_PORT/coffee?TEST=v2
 ```
 
 Output should be similar to
+
 ```code
 Server address: 10.0.156.121:8080
 Server name: coffee-v2-685fd9bb65-dz5pp
@@ -162,11 +180,13 @@ Request ID: eac31b251dfdf398033d8e8373df14c9
 ```
 
 Access `coffee-v2` using an HTTP header
+
 ```code
 curl --resolve cafe.example.com:$HTTP_PORT:$NGF_IP http://cafe.example.com:$HTTP_PORT/coffee -H "version: v2"
 ```
 
 Output should be similar to
+
 ```code
 Server address: 10.0.156.121:8080
 Server name: coffee-v2-685fd9bb65-dz5pp
@@ -176,11 +196,13 @@ Request ID: 0f5cd7a2f62965279c4bdc52c660c97d
 ```
 
 Access `coffee-v3` using a query string
+
 ```code
 curl --resolve cafe.example.com:$HTTP_PORT:$NGF_IP http://cafe.example.com:$HTTP_PORT/coffee?queryRegex=query-a
 ```
 
 Output should be similar to
+
 ```code
 Server address: 192.168.169.141:8080
 Server name: coffee-v3-7fb98466f-tgq8k
@@ -190,11 +212,13 @@ Request ID: 2c755a8391ebd2df87f416510fb5478b
 ```
 
 Access `coffee-v3` using an HTTP header
+
 ```code
 curl --resolve cafe.example.com:$HTTP_PORT:$NGF_IP http://cafe.example.com:$HTTP_PORT/coffee -H "headerRegex: header-a"
 ```
 
 Output should be similar to
+
 ```code
 Server address: 192.168.169.141:8080
 Server name: coffee-v3-7fb98466f-tgq8k
@@ -204,11 +228,13 @@ Request ID: 81431954b4b52edc01d707b4e5822792
 ```
 
 Access `tea` using `GET`
+
 ```code
 curl --resolve cafe.example.com:$HTTP_PORT:$NGF_IP http://cafe.example.com:$HTTP_PORT/tea
 ```
 
 Output should be similar to
+
 ```code
 Server address: 10.0.156.108:8080
 Server name: tea-596697966f-hzjw5
@@ -218,11 +244,13 @@ Request ID: 7a45019ce6b1380b5d5402be89103703
 ```
 
 Access `tea` using `POST`
+
 ```code
 curl --resolve cafe.example.com:$HTTP_PORT:$NGF_IP http://cafe.example.com:$HTTP_PORT/tea -X POST
 ```
 
 Output should be similar to
+
 ```code
 Server address: 10.0.156.122:8080
 Server name: tea-post-5647b8d885-5xxvf
