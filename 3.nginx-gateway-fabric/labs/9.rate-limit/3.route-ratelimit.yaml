@@ -15,6 +15,6 @@ spec:
       rules:
       - zoneSize: 10m
         key: "$binary_remote_addr"
-        rate: 1r/s
+        rate: 10r/s
         burst: 0
     rejectCode: 429
