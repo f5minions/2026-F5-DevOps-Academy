@@ -1,4 +1,4 @@
-# Getting started with use cases
+# 사전준비(원활한 Lab을 위해 이미 준비됨, 추가적으로 실행할 필요가 없음)
 
 1. 랩 진행을 위해 아래 github 리포지토리를 클론합니다.
 
