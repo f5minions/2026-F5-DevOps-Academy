@@ -263,23 +263,22 @@ NGINX Gateway Fabric은 NGINX OSS와 NGINX Plus를 모두 지원합니다. NGINX
 
 ---
 
-## 랩 배포
-
-[사전 요구사항](/README.md#getting-started)을 참고하세요.
-
 ## 설치
 
-> **주의: 공개 리포지토리의 라이센스 문제로 인해 1번~4번까지의 과정은 이미 Kubernetes에 적용이 되어 있기 때문에 따로 수행할 필요가 없습니다. 5번 CRD 배포부터 Lab을 진행하시면 됩니다.**
+> **참고:** [사전 요구사항](/README.md#getting-started)을 참고하세요.
+
+> **⚠️ 주의:** 공개 리포지토리의 라이센스 문제로 인해 **Step 1 ~ 4는 이미 Kubernetes에 적용**되어 있습니다.
+> Step 5 CRD 배포부터 진행하세요.
 
 ### 1. NGINX Gateway Fabric 네임스페이스 생성
 
-```code
+```bash
 kubectl create namespace nginx-gateway
 ```
 
 ### 2. NGINX 프라이빗 레지스트리에서 이미지를 가져오기 위한 Kubernetes 시크릿 생성
 
-```code
+```bash
 kubectl create secret docker-registry nginx-plus-registry-secret --docker-server=private-registry.nginx.com --docker-username=`cat <nginx-one-eval.jwt>` --docker-password=none -n nginx-gateway
 ```
 
@@ -287,7 +286,7 @@ kubectl create secret docker-registry nginx-plus-registry-secret --docker-server
 
 ### 3. NGINX Plus 라이선스를 담은 Kubernetes 시크릿 생성
 
-```code
+```bash
 kubectl create secret generic nplus-license --from-file license.jwt=<nginx-one-eval.jwt> -n nginx-gateway
 ```
 
@@ -295,7 +294,7 @@ kubectl create secret generic nplus-license --from-file license.jwt=<nginx-one-e
 
 ### 4. 사용 가능한 NGINX Gateway Fabric 도커 이미지 목록 확인
 
-```code
+```bash
 curl -s https://private-registry.nginx.com/v2/nginx-gateway-fabric/nginx-plus/tags/list --key <nginx-one-eval.key> --cert <nginx-one-eval.crt> | jq
 ```
 
@@ -305,13 +304,13 @@ curl -s https://private-registry.nginx.com/v2/nginx-gateway-fabric/nginx-plus/ta
 
 ### 5. NGINX Gateway Fabric 커스텀 리소스 적용 (`ref=` 에 최신 버전을 지정하세요)
 
-```code
+```bash
 kubectl kustomize "https://github.com/nginx/nginx-gateway-fabric/config/crd/gateway-api/standard?ref=v2.4.2" | kubectl apply -f -
 ```
 
 ### 6. Helm 차트를 통해 NGINX Gateway Fabric 설치 (`nginx.image.tag` 에 최신 버전을 지정하세요)
 
-```code
+```bash
 helm install ngf oci://ghcr.io/nginx/charts/nginx-gateway-fabric \
   --set nginx.image.repository=private-registry.nginx.com/nginx-gateway-fabric/nginx-plus \
   --set nginx.image.tag=2.4.2 \
@@ -326,26 +325,26 @@ helm install ngf oci://ghcr.io/nginx/charts/nginx-gateway-fabric \
 
 ### 7. NGINX Gateway Fabric Pod 상태 확인
 
-```code
+```bash
 kubectl get pods -n nginx-gateway
 ```
 
 Pod 이 `Running` 상태여야 합니다.
 
-```code
+```
 NAME                                            READY   STATUS      RESTARTS   AGE
 ngf-nginx-gateway-fabric-78658c6d47-bv6pb       1/1     Running     0          15s
 ```
 
 ### 8. NGINX Gateway Fabric 로그 확인
 
-```code
+```bash
 kubectl logs -l app.kubernetes.io/instance=ngf -n nginx-gateway -c nginx-gateway
 ```
 
 출력 결과는 아래와 유사해야 합니다.
 
-```code
+```
 {"level":"info","ts":"2026-03-02T13:35:54Z","msg":"Starting the NGINX Gateway Fabric control plane","version":"2.4.2","commit":"44b3320a430bedf23d96ba1e7c86577fba304e68","date":"2026-02-18T19:49:50Z","dirty":"true"}
 {"level":"info","ts":"2026-03-02T13:35:54Z","msg":"Starting manager"}
 {"level":"info","ts":"2026-03-02T13:35:54Z","logger":"controller-runtime.metrics","msg":"Starting metrics server"}
@@ -359,26 +358,26 @@ kubectl logs -l app.kubernetes.io/instance=ngf -n nginx-gateway -c nginx-gateway
 
 ### 9. Kubernetes 서비스 상태 확인
 
-```code
+```bash
 kubectl get svc -n nginx-gateway
 ```
 
 NGINX Gateway Fabric 컨트롤 플레인은 TCP 포트 443에서 수신 대기해야 합니다.
 
-```code
+```
 NAME                       TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)   AGE
 ngf-nginx-gateway-fabric   ClusterIP   10.99.80.168   <none>        443/TCP   39s
 ```
 
 ### 10. `gatewayclass` 확인
 
-```code
+```bash
 kubectl get gatewayclass
 ```
 
 `nginx` gatewayclass 가 정상적으로 허용(Accepted)되어야 합니다.
 
-```code
+```
 NAME    CONTROLLER                                   ACCEPTED   AGE
 nginx   gateway.nginx.org/nginx-gateway-controller   True       49s
 ```
@@ -389,24 +388,24 @@ nginx   gateway.nginx.org/nginx-gateway-controller   True       49s
 
 ### 1. Helm 차트를 통해 NGINX Gateway Fabric 제거
 
-```code
+```bash
 helm uninstall ngf -n nginx-gateway
 ```
 
 ### 2. 네임스페이스 삭제
 
-```code
+```bash
 kubectl delete namespace nginx-gateway
 ```
 
 ### 3. 모든 CRD 제거
 
-```code
+```bash
 kubectl delete -f https://raw.githubusercontent.com/nginx/nginx-gateway-fabric/v2.4.2/deploy/crds.yaml
 ```
 
 ### 4. Gateway API 리소스 제거
 
-```code
+```bash
 kubectl kustomize "https://github.com/nginx/nginx-gateway-fabric/config/crd/gateway-api/standard?ref=v2.4.2" | kubectl delete -f -
 ```
