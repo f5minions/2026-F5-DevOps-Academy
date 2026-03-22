@@ -1,30 +1,32 @@
-# Rate Limiting 활용사례
+# Lab 9 — Rate Limiting 활용사례
 
-이번 실습에서는 HTTP와 gRPC route에서 어떻게 요청의 제한(limits)을 적용할 수 있는가에 대해서 알아보겠습니다.
+> HTTP Route와 gRPC Route에서 `RateLimitPolicy`를 사용해 요청 수를 제한하는 방법을 실습합니다.
 
-이번 랩의 진행을 위해 해당 디렉토리로 이동합니다.
+---
 
-```code
-이전 Lab 디렉토리에 있다면,
+## 실습 경로 이동
+
+```bash
+# 이전 Lab 디렉토리에 있다면
 cd ../9.rate-limit/
 
-Lab 기본경로(2026-F5-DevOps-Academy)에 있다면,
+# Lab 기본경로(2026-F5-DevOps-Academy)에 있다면
 cd 3.nginx-gateway-fabric/labs/9.rate-limit
 ```
 
-실습을 위한 테스트 애플리케이션을 먼저 배포합니다.
+---
 
-```code
+## Step 1 — 테스트 애플리케이션 배포
+
+```bash
 kubectl apply -f 0.apps.yaml
 ```
 
-배포한 테스트 애플리케이션의 `running` 상태를 확인합니다. 
+배포 상태가 `Running`인지 확인합니다.
 
-```code
+```bash
 kubectl get all
 ```
-
-결과는 아래와 유사합니다. 
 
 ```
 NAME                                READY   STATUS    RESTARTS   AGE
@@ -46,19 +48,23 @@ replicaset.apps/coffee-56b44d4c55         1         1         1       41s
 replicaset.apps/grpc-backend-68ff5cb6c9   1         1         1       40s
 ```
 
-이제 동일한 namespace에  `RateLimitPolicy`를 함께 적용한 NGINX Gateway Fabric 데이터플레인을 배포하여 gateway 오브젝트로 생성합니다. 
+---
 
-```code
+## Step 2 — Gateway 및 RateLimitPolicy 배포
+
+`RateLimitPolicy`를 함께 포함한 Gateway를 배포합니다.
+
+```bash
 kubectl apply -f 1.gateway.yaml
 ```
 
-NGINX Gateway Fabric 데이터플레인 pod 배포 상태를 확인합니다.
+### 데이터플레인 Pod 상태 확인
 
-```
+```bash
 kubectl get pods
 ```
 
-`gateway-nginx-7b79d89c-p8v8v` 가 NGINX Gateway Fabric 데이터플레인 pod 입니다.
+`gateway-nginx-7b79d89c-p8v8v`가 NGINX Gateway Fabric 데이터플레인 Pod입니다.
 
 ```
 NAME                            READY   STATUS    RESTARTS   AGE
@@ -67,28 +73,26 @@ gateway-nginx-7b79d89c-p8v8v    1/1     Running   0          14s
 grpc-backend-68ff5cb6c9-c565t   1/1     Running   0          88s
 ```
 
-Gateway 배포를 확인합니다.
+### Gateway 상태 확인
 
-```code
+```bash
 kubectl get gateway
 ```
 
-아래의 결과와 유사하게 확인이 되어야 합니다.
-
-```code
+```
 NAME      CLASS   ADDRESS       PROGRAMMED   AGE
 gateway   nginx   10.97.59.36   True         31s
 ```
 
-동일하게 NGINX Gateway Fabric 데이터플레인 서비스 상태도 함께 확인합니다.
-
-```code
-kubectl get service
-```
+### Service 상태 확인
 
 `gateway-nginx`가 NGINX Gateway Fabric 데이터플레인의 서비스입니다.
 
-```code
+```bash
+kubectl get service
+```
+
+```
 NAME            TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)           AGE
 coffee          ClusterIP   10.97.137.125   <none>        80/TCP            13m
 gateway-nginx   NodePort    10.97.59.36     <none>        80:32700/TCP      12m
@@ -97,28 +101,24 @@ kubernetes      ClusterIP   10.96.0.1       <none>        443/TCP           506d
 nginx-svc       ClusterIP   10.101.127.99   <none>        80/TCP,8080/TCP   13d
 ```
 
-Gateway에 함께 배포된 rate limit policy의 배포상태도 확인합니다. 
+### Gateway 레벨 RateLimitPolicy 확인
 
-```code
+```bash
 kubectl get ratelimitpolicy
 ```
 
-아래와 같은 결과를 확인할 수 있습니다.
-
-```code
+```
 NAME                 AGE
 gateway-rate-limit   107s
 ```
 
-Describe명령으로 `RateLimitPolicy`의 설정 내용을 확인합니다. 현재 랩의 경우 Gateway 레벨에 초당 10개의 요청(10 req/sec)로 설정이 되어 있습니다. 
+`describe` 명령으로 상세 설정을 확인합니다. 현재 **Gateway 레벨**에서 **10 req/sec** (IP 기준)으로 설정되어 있습니다.
 
-```code
+```bash
 kubectl describe RateLimitPolicy gateway-rate-limit
 ```
 
-아래와 같은 내용을 확인할 수 있으며, 설정에서 key는 "$binary_remote_addr"이기 때문에 기준은 요청한 사용자의 IP주소가 됩니다.
-
-```code
+```
 Name:         gateway-rate-limit
 Namespace:    default
 Labels:       <none>
@@ -159,67 +159,65 @@ Status:
 Events:                      <none>
 ```
 
-두번째로 gRPC 애플리케이션에 대한 Rate Limit 테스트를 위해 gRPC Route도 함께 배포합니다.
+---
 
-```code
+## Step 3 — HTTPRoute 및 gRPCRoute 배포
+
+```bash
 kubectl apply -f 2.routes.yaml
 ```
 
-먼저 배포한 HTTP Route 설정을 확인합니다. 
+### HTTPRoute 확인
 
-```code
+```bash
 kubectl get httproute
 ```
 
-결과는 아래와 같이 확인이 되어야 합니다.
-
-```code
+```
 NAME     HOSTNAMES              AGE
 coffee   ["cafe.example.com"]   82s
 ```
 
-두번째 배포한 gRPC route 설정을 함께 확인합니다.
+### gRPCRoute 확인
 
-```code
+```bash
 kubectl get grpcroute
 ```
 
-아래와 같은 결과를 확인할 수 있습니다.
-
-```code
+```
 NAME         HOSTNAMES              AGE
 grpc-route   ["grpc.example.com"]   113s
 ```
 
-이제 `HTTPRoute`와 `gRPCRoute`에 Rate Limit을 적용하기 위해 `RateLimitPolicy` 정책을 연결합니다. 
+---
 
-```code
+## Step 4 — Route 레벨 RateLimitPolicy 적용
+
+`HTTPRoute`와 `gRPCRoute`에 Rate Limit 정책을 연결합니다.
+
+```bash
 kubectl apply -f 3.route-ratelimit.yaml
 ```
 
-지금까지 설정한 전체 rate limit 내용을 확인합니다.
+전체 RateLimitPolicy 목록을 확인합니다.
 
-```code
+```bash
 kubectl get ratelimitpolicy
 ```
 
-결과는 아래와 같이 보입니다.
-
-```code
+```
 NAME                 AGE
 gateway-rate-limit   8m24s
 route-rate-limit     81s
 ```
 
-Gateway 레벨이 아닌 `HTTPRoute` 및 `gRPCRoute` 레벨에 적용한 `RateLimitPolicy`의 내용을 Describe하여 설정내용을 확인합니다. 
+Route 레벨 정책의 상세 내용을 확인합니다. **HTTPRoute** 및 **gRPCRoute** 레벨에서 **1 req/sec**으로 설정된 것을 확인할 수 있습니다.
 
-```code
+```bash
 kubectl describe ratelimitpolicy route-rate-limit
 ```
 
-아래와 유사한 결과를 확인할 수 있어야 합니다. HTTPRoute 레벨 및 GRPCRoute 레벨로 적용된 Rate Limit은 초당 1개의 요청( 1 req/sec )로 설정된 것을 내용에서 확인할 수 있습니다.
-
-```code
+```
 Name:         route-rate-limit
 Namespace:    default
 Labels:       <none>
@@ -277,28 +275,32 @@ Status:
 Events:                      <none>
 ```
 
-NGINX Gateway Fabric 데이터플레인 인스턴스의 IP 주소와 HTTP PORT 정보를 확인 후 변수로 저장합니다.
+---
 
-```code
+## Step 5 — 테스트
+
+### 환경 변수 설정
+
+```bash
 export NGF_IP=`kubectl get pod -l app.kubernetes.io/instance=ngf -o json|jq '.items[0].status.hostIP' -r`
 export HTTP_PORT=`kubectl get svc gateway-nginx -o jsonpath='{.spec.ports[0].nodePort}'`
 ```
 
-저장된 NGINX Gateway Fabric 데이터플레인 인스턴스의 IP와 HTTP PORT정보를 확인합니다.
-
-```code
+```bash
 echo -e "NGF address: $NGF_IP\nHTTP port  : $HTTP_PORT"
 ```
 
-첫번째 테스트로 HTTP 애플리케이션으로 1번의 요청을 전송해서 정상 접속을 먼저 확인합니다. 
+---
 
-```code
+### HTTP Rate Limit 테스트
+
+**단일 요청** — 정상 응답 확인
+
+```bash
 curl -i --resolve cafe.example.com:$HTTP_PORT:$NGF_IP http://cafe.example.com:$HTTP_PORT/coffee
 ```
 
-결과는 아래와 같이 정상적인 요청에 대한 응답이 제공됩니다.
-
-```code
+```
 HTTP/1.1 200 OK
 Server: nginx
 Date: Thu, 05 Feb 2026 17:41:00 GMT
@@ -315,15 +317,15 @@ URI: /coffee
 Request ID: 03f15068dc0890cc33ac117322041ecc
 ```
 
-이번엔 2번의 요청을 동시에 전송합니다. 
+**연속 2회 요청** — Rate Limit 동작 확인
 
-```code
+```bash
 curl -i --resolve cafe.example.com:$HTTP_PORT:$NGF_IP http://cafe.example.com:$HTTP_PORT/coffee;echo "---";curl -i --resolve cafe.example.com:$HTTP_PORT:$NGF_IP http://cafe.example.com:$HTTP_PORT/coffee
 ```
 
-결과는 아래와 같이 적용된 1 req/sec rate limit이 적용되어 2번째 요청은 `429 Too Many Requests` 응답이 제공되는 것을 확인할 수 있습니다. 
+1 req/sec 제한으로 인해 두 번째 요청에서 `429 Too Many Requests`가 반환됩니다.
 
-```code
+```
 HTTP/1.1 200 OK
 Server: nginx
 Date: Thu, 05 Feb 2026 17:42:10 GMT
@@ -355,29 +357,31 @@ Connection: keep-alive
 </html>
 ```
 
-동일한 방식으로 gRPC 애플리케이션에 대한 요청을 1번만 전송합니다. 
+---
 
-```code
+### gRPC Rate Limit 테스트
+
+**단일 요청** — 정상 응답 확인
+
+```bash
 grpcurl -plaintext -proto grpc.proto -authority grpc.example.com -d '{"name": "exact"}' $NGF_IP:$HTTP_PORT helloworld.Greeter/SayHello
 ```
 
-예상한 바와 같이 1번의 요청은 정상적으로 처리되어 200 응답이 제공됩니다. 
-
-```code
+```json
 {
   "message": "Hello exact"
 }
 ```
 
-이번엔 2번의 gRPC 요청을 한번에 전달합니다. 
+**연속 2회 요청** — Rate Limit 동작 확인
 
-```code
+```bash
 grpcurl -plaintext -proto grpc.proto -authority grpc.example.com -d '{"name": "exact"}' $NGF_IP:$HTTP_PORT helloworld.Greeter/SayHello;echo "---";grpcurl -plaintext -proto grpc.proto -authority grpc.example.com -d '{"name": "exact"}' $NGF_IP:$HTTP_PORT helloworld.Greeter/SayHello
 ```
 
-아래와 같은 결과를 확인할 수 있습니다. 2번째 요청은 Gateway를 통해서 서버로 전달되지 않고 NGINX에서 제한했기 때문에 아래와 같이 unknown 에러가 발생하였습니다. 이 내용은 NGINX Gateway 로그를 통해서도 확인할 수 있습니다. 
+두 번째 요청은 NGINX에서 차단되어 `Unknown` 에러가 발생합니다. NGINX Gateway 로그에서도 동일한 내용을 확인할 수 있습니다.
 
-```code
+```
 {
   "message": "Hello exact"
 }
@@ -392,10 +396,12 @@ ERROR:
 2026/03/21 14:01:33 [error] 85#85: *148 limiting requests, excess: 0.973 by zone "default_rl_route-rate-limit_rule0", client: 10.1.1.10, server: grpc.example.com, request: "POST /helloworld.Greeter/SayHello HTTP/2.0", host: "grpc.example.com"
 ```
 
-위 결과를 모두 확인하셨다면 다음 실습을 위해 이번 실습의 설정은 모두 삭제합니다.
+---
 
-```code
+## 실습 종료 — 리소스 삭제
+
+```bash
 kubectl delete -f .
 ```
 
-이번 NGINX Gateway Fabric 실습은 여기까지 마무리가 되었습니다. 수고하셨습니다^^
+> 이번 NGINX Gateway Fabric 실습은 여기까지 마무리가 되었습니다. 수고하셨습니다.

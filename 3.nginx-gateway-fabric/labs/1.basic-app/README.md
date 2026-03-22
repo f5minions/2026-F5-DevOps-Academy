@@ -1,26 +1,28 @@
-# 기본 URI 기반 라우팅
+# Lab 1 — 기본 URI 기반 라우팅
 
-이번 실습에서는 URI 기반의 라우팅을 통해 2개의 애플리케이션을 배포하고 어떻게 동작하는가를 확인합니다.
+> URI 경로 기반의 라우팅으로 2개의 애플리케이션을 배포하고, NGINX Gateway Fabric을 통해 트래픽이 어떻게 전달되는지 확인합니다.
 
-Lab 실습을 위한 디렉토리로 이동합니다.
+---
 
-```code
+## 실습 경로 이동
+
+```bash
 cd 3.nginx-gateway-fabric/labs/1.basic-app
 ```
 
-2개의 예제 애플리케이션을 먼저 배포합니다. 
+---
 
-```code
+## Step 1 — 테스트 애플리케이션 배포
+
+```bash
 kubectl apply -f 0.cafe.yaml
 ```
 
-아래 명령으로 배포한 애플리케이션이 정상 running 상태인지 확인할 수 있습니다. 아래 결과와 같이 running 상태가 아니라면 알려주세요!!
+배포 상태가 `Running`인지 확인합니다.
 
-```code
+```bash
 kubectl get all
 ```
-
-아래와 같은 결과를 확인할 수 있습니다.
 
 ```
 NAME                          READY   STATUS    RESTARTS   AGE
@@ -41,19 +43,23 @@ replicaset.apps/coffee-56b44d4c55   1         1         1       8m39s
 replicaset.apps/tea-596697966f      1         1         1       8m39s
 ```
 
-`Gateway` 오브젝트를 배포합니다. NGINX Gateway Fabric의 데이터플레인을 현재 `namespace`에 배포합니다.
+---
 
-```code
+## Step 2 — Gateway 배포
+
+NGINX Gateway Fabric 데이터플레인을 현재 `namespace`에 배포합니다.
+
+```bash
 kubectl apply -f 1.gateway.yaml
 ```
 
-NGINX Gateway Fabric 데이터플레인 pod의 상태를 확인합니다.
+### Pod 상태 확인
 
-```
+```bash
 kubectl get pods
 ```
 
- `gateway-nginx-c9bcdf4d4-4hl7c`는 NGINX Gateway Fabric 데이터플레인 pod 입니다.
+`gateway-nginx-c9bcdf4d4-4hl7c`는 NGINX Gateway Fabric 데이터플레인 Pod입니다.
 
 ```
 NAME                            READY   STATUS    RESTARTS   AGE
@@ -62,28 +68,26 @@ gateway-nginx-c9bcdf4d4-4hl7c   1/1     Running   0          24s
 tea-596697966f-fwf2r            1/1     Running   0          47s
 ```
 
-Gateway 배포 정보를 확인합니다.
+### Gateway 상태 확인
 
-```code
+```bash
 kubectl get gateway
 ```
 
-아래와 같은 결과를 확인할 수 있습니다.
-
-```code
+```
 NAME      CLASS   ADDRESS        PROGRAMMED   AGE
 gateway   nginx   10.102.76.40   True         5s
 ```
 
-그리고 NGINX Gateway Fabric 데이터플레인의 서비스 설정 정보도 함께 확인합니다.
-
-```code
-kubectl get service
-```
+### Service 상태 확인
 
 `gateway-nginx`는 NGINX Gateway Fabric 데이터플레인의 서비스입니다.
 
-```code
+```bash
+kubectl get service
+```
+
+```
 NAME            TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)        AGE
 coffee          ClusterIP   10.107.171.2    <none>        80/TCP         2s
 gateway-nginx   NodePort    10.100.81.10    <none>        80:32604/TCP   15s
@@ -91,48 +95,48 @@ kubernetes      ClusterIP   10.96.0.1       <none>        443/TCP        268d
 tea             ClusterIP   10.96.115.255   <none>        80/TCP         2s
 ```
 
-사용자의 요청을 전달하기 위한 HTTP Route 설정을 배포합니다. 
+---
 
-```code
+## Step 3 — HTTPRoute 배포
+
+사용자 요청을 각 애플리케이션으로 전달하기 위한 HTTP Route를 배포합니다.
+
+```bash
 kubectl apply -f 2.httproute.yaml
 ```
 
-HTTP routes 설정 정보를 확인합니다.
-
-```code
+```bash
 kubectl get httproute
 ```
 
-아래와 같은 결과를 확인할 수 있습니다.
-
-```code
+```
 NAME     HOSTNAMES              AGE
 coffee   ["cafe.example.com"]   8s
 tea      ["cafe.example.com"]   8s
 ```
 
-NGINX Gateway Fabric의 데이터플레인 인스턴스의 IP와 HTTP PORT정보를 가져와서 변수로 저장합니다.
+---
 
-```code
+## Step 4 — 테스트
+
+### 환경 변수 설정
+
+```bash
 export NGF_IP=`kubectl get pod -l app.kubernetes.io/instance=ngf -o json|jq '.items[0].status.hostIP' -r`
 export HTTP_PORT=`kubectl get svc gateway-nginx -o jsonpath='{.spec.ports[0].nodePort}'`
 ```
 
-NGINX Gateway Fabric 데이터플레인 인스턴스의 IP와 HTTP PORT 정보를 확인합니다.
-
-```code
+```bash
 echo -e "NGF address: $NGF_IP\nHTTP port  : $HTTP_PORT"
 ```
 
-이제 아래 명령을 사용하고 `coffee`라는 첫번째 애플리케이션으로 접속을 테스트 합니다. 
+### coffee 애플리케이션 접속
 
-```code
+```bash
 curl --resolve cafe.example.com:$HTTP_PORT:$NGF_IP http://cafe.example.com:$HTTP_PORT/coffee
 ```
 
-결과는 아래와 같이 `coffee` 애플리케이션으로 정상적으로 접속이 됩니다.
-
-```code
+```
 Server address: 192.168.36.115:8080
 Server name: coffee-56b44d4c55-nm5rx
 Date: 24/Mar/2025:21:08:19 +0000
@@ -140,15 +144,13 @@ URI: /coffee
 Request ID: 5136f3dd98058fc9edcad13998902e79
 ```
 
-두번째 `tea` 애플리케이션으로 접속을 테스트 합니다. 
+### tea 애플리케이션 접속
 
-```code
+```bash
 curl --resolve cafe.example.com:$HTTP_PORT:$NGF_IP http://cafe.example.com:$HTTP_PORT/tea
 ```
 
-결과는 아래와 같이 두번째 `tea` 애플리케이션으로 접속을 확인할 수 있습니다.
-
-```code
+```
 Server address: 192.168.36.116:8080
 Server name: tea-596697966f-lk2gp
 Date: 24/Mar/2025:21:08:23 +0000
@@ -156,8 +158,10 @@ URI: /tea
 Request ID: 09603099f3ad42da023a6184019ffbb6
 ```
 
-이번 실습에서는 Gateway와 기본 URI 기반의 HTTP Route 설정을 통해서 간단하게 애플리케이션 접속을 실습했습니다. 위 테스트가 모두 완료되었다면 다음 실습을 위해 전체 설정을 삭제 합니다. 
+---
 
-```code
+## 실습 종료 — 리소스 삭제
+
+```bash
 kubectl delete -f .
 ```
