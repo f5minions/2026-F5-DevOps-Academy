@@ -198,8 +198,8 @@ server {
     }
 
     location / {
-    root /usr/share/nginx/html;
-    index   dashboard.html;
+        root /usr/share/nginx/html;
+        index   dashboard.html;
     }
 }
 
