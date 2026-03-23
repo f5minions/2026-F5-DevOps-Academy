@@ -1,7 +1,7 @@
 # Ingress Controller Lab #4 - Traffic Splitting  
 
 ## Lab 개요 
-* NGINX Ingress Controller 수준에서 JWT 인증을 적용하는 방법을 실습 
+* NGINX Ingress Controller 수준에서 트래픽 분리를 구성 ( Canary Deploy ) 
 
 * 랩의 결과 
     - `coffee-v1-svc`와 `coffee-v2-svc`라는 두 개의 서비스를 가진 샘플 애플리케이션에 대한 트래픽 분할을 구성
