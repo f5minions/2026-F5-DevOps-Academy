@@ -6,6 +6,8 @@ Kubernetes 에 F5 CIS Controller 를 배포하는 과정입니다.
 ### F5 BIG-IP - iRule 생성
 * iRule 추가 
     ```Basic
+    Name : Proxy_Protocol_iRule
+    
     when SERVER_CONNECTED {
       TCP::respond "PROXY TCP[IP::version] [IP::client_addr] [clientside {IP::local_addr}] [TCP::client_port] [clientside {TCP::local_port}]\r\n"
     }
