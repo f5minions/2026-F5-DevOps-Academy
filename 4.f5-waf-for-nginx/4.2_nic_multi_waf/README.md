@@ -36,7 +36,7 @@
 > **실행 환경:** Client-vscode 터미널
 
 ```bash
-cd ~/2026-F5-DevOps-Academy/4.f5-waf-for-nginx/4.2_nic_multi_waf
+cd /home/ubuntu/2026-F5-DevOps-Academy/4.f5-waf-for-nginx/4.2_nic_multi_waf
 ```
 
 ### Step 2 · 애플리케이션 배포 (`apps.yml`)

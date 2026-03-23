@@ -68,7 +68,7 @@
 kubectl config use-context rancher1
 
 # 실습 디렉토리로 이동
-cd ~/2026-F5-DevOps-Academy/4.f5-waf-for-nginx/4.1_nic_waf
+cd /home/ubuntu/2026-F5-DevOps-Academy/4.f5-waf-for-nginx/4.1_nic_waf
 ```
 
 ```bash
