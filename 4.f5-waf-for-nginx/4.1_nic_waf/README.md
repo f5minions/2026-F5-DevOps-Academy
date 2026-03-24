@@ -525,3 +525,5 @@ curl -X LINK "http://nap.f5k8s.net"
 ---
 
 *LAB 4.1 End*
+
+[**Lab 4.2로 이동**](../4.2_nic_multi_waf/README.md)
