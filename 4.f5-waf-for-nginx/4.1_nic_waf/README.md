@@ -72,10 +72,10 @@ cd /home/ubuntu/2026-F5-DevOps-Academy/4.f5-waf-for-nginx/4.1_nic_waf
 ```
 
 ```bash
-# Host 파일에 nap.f5k8s.net 도메인 추가
+# Host 파일에 nap.f5k8s.net/nap-cafe.f5k8s.net 도메인 추가
 sudo vi /etc/hosts
 
-10.1.10.100 cafe.ing.example.com cafe.vs.example.com webapp.vs.example.com nap.f5k8s.net
+10.1.10.100 cafe.ing.example.com cafe.vs.example.com webapp.vs.example.com nap.f5k8s.net nap-cafe.f5k8s.net
 ```
 ---
 
