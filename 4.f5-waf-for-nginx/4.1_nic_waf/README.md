@@ -176,6 +176,10 @@ kubectl get APLogConf -n nap
 `APPolicy`와 `APLogConf`를 조합하여 NIC에 적용할 최종 정책을 생성합니다.  
 로그는 Elasticsearch(Fluentd 경유)와 로컬 syslog 두 곳으로 전송됩니다.
 
+```bash
+cat policy.yml
+```
+
 ```yaml
 apiVersion: k8s.nginx.org/v1
 kind: Policy
@@ -205,6 +209,9 @@ kubectl get Policy.k8s.nginx.org -n nap
 ### Step 5 · VirtualServer 배포 (`virtual-server.yml`)
 
 `waf-policy-demo` 정책을 Webapp에 연결하고, NIC를 통해 외부로 노출합니다.
+
+```bash
+cat virtual-server.yml
 
 ```yaml
 apiVersion: k8s.nginx.org/v1
