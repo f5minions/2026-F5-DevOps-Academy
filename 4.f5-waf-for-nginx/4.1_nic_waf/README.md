@@ -142,6 +142,29 @@ kubectl get APPolicy -n nap
 `APLogConf`는 WAF 로그의 출력 형식, 최대 메시지 크기, 기록할 요청 유형(여기서는 `illegal`만)을 정의합니다.
 
 ```bash
+cat log.yml
+```
+
+```yaml
+apiVersion: appprotect.f5.com/v1beta1
+kind: APLogConf
+metadata:
+  name: logconf
+  namespace: nap
+spec:
+  content:
+    format: user-defined                  # 로그 형식을 직접 정의
+    format_string: "{\"campaign_names\":\"%threat_campaign_names%\",\"bot_signature_name\":\"%bot_signature_name%\",\"bot_category\":\"%bot_category%\",\"bot_anomalies\":\"%bot_anomalies%\",\"enforced_bot_anomalies\":\"%enforced_bot_anomalies%\",\"client_class\":\"%client_class%\",\"client_application\":\"%client_application%\",\"json_log\":%json_log%}"
+    max_message_size: 30k                 # 로그 메시지 최대 크기
+    max_request_size: "500"               # 기록할 요청 본문 최대 크기 (bytes)
+    escaping_characters:
+    - from: "%22%22"
+      to: "%22"
+  filter:
+    request_type: illegal                 # 위반(차단/경고) 요청만 로그 기록
+```
+
+```bash
 kubectl apply -f log.yml
 kubectl get APLogConf -n nap
 ```
