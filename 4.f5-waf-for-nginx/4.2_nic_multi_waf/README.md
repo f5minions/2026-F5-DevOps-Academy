@@ -109,11 +109,11 @@ apiVersion: k8s.nginx.org/v1
 kind: VirtualServer
 metadata:
   name: nap-cafe
-  namespace: nap-vs
+  namespace: nap
 spec:
   host: nap-cafe.f5k8s.net
   policies:
-  - name: cocoa-policy        # Catch-all: 매칭되는 경로가 없을 때 적용
+  - name: cocoa-policy
   upstreams:
   - name: cocoa
     service: cocoa-svc
@@ -123,21 +123,21 @@ spec:
     port: 80
   - name: tea
     service: tea-svc
-    port: 80
+    port: 80    
   routes:
   - path: /                   # 기본 경로 → cocoa 정책 적용
     action:
-      pass: webapp
+      pass: cocoa
   - path: /tea                # /tea 경로 전용 정책
     policies:
     - name: tea-policy
     action:
-      pass: webapp
+      pass: tea
   - path: /coffee             # /coffee 경로 전용 정책
     policies:
     - name: coffee-policy
     action:
-      pass: webapp
+      pass: coffee
 ```
 
 > **포인트:** 최상위 `policies`는 Catch-all 역할을 하며, 각 `routes` 안의 `policies`가 해당 경로에 우선 적용됩니다.
