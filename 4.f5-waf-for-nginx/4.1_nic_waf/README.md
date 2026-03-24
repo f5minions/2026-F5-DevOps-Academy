@@ -212,6 +212,7 @@ kubectl get Policy.k8s.nginx.org -n nap
 
 ```bash
 cat virtual-server.yml
+```
 
 ```yaml
 apiVersion: k8s.nginx.org/v1
