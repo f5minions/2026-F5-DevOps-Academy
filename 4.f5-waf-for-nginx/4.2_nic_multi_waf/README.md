@@ -207,4 +207,4 @@ curl "http://nap-cafe.f5k8s.net/unknown/?user=<script>"
 
 *LAB 4.2 End*
 
-[**Lab 4.3로 이동**](../4.3_nic_multi_waf/README.md)
+[**Lab 4.3로 이동**](../4.3_nim_waf_management/README.md)
